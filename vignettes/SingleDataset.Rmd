@@ -1,0 +1,48 @@
+---
+title: "SingleDataset"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{SingleDataset}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+# This vignette will provide guidance for analysis of a single dataset.
+
+Let's assume you have a dataset at the ready. I will try to provide a small example dataset for reproducible tutorials in the future.
+
+first load up the package. 
+
+```{r setup}
+#install.packages("devtools") #if devtools not already installed
+#devtools::install_github('apf2139/tamlabscpipeline')
+library(tamlabscpipeline)
+```
+
+
+Let us assume also that you have access to an output of cellranger in the form of a dir or an H5 file. 
+
+The seuratpipeline() function will perform QC and initial clustering of your dataset. This will involve filtering out high mitochondrial content cells, low library size cells, and doublets; then normalizing using [SingleCellTransform (SCT)](https://genomebiology.biomedcentral.com/articles/10.1186/s13059-019-1874-1) and clustering using the Louvain method as implemented in [Seurat](https://satijalab.org/seurat/).
+
+Here is a quick start for launching the analysis pipeline using this function. I have used the object filepath to store a string containing the path to an example file.
+
+The command prints out a bunch of plots for QC purposes, so best to wrap it in a pdf command block.
+
+
+```{r seuratpipeline}
+#pdf('testrun.pdf')
+
+##sobj <- seuratpipeline(data = filepath, #path to dataset
+#               format = h5 #format; dir or H5
+               
+#               )
+
+```
