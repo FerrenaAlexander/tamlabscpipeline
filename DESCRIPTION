@@ -13,3 +13,5 @@ Imports:
     Seurat,
     MAST
 RoxygenNote: 7.0.0
+URL: https://github.com/apf2139/tamlabscpipeline
+BugReports: https://github.com/apf2139/tamlabscpipeline/issues
