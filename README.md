@@ -4,7 +4,7 @@ A basic package for scRNAseq data analysis
 
 Installation instructions:
 ```
-install. packages("devtools") #if devtools not already installed
+install.packages("devtools") #if devtools not already installed
 devtools::install_github('apf2139/tamlabscpipeline')
 ```
 
