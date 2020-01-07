@@ -86,10 +86,6 @@ seuratpipeline <- function(data,
                               min.features = 200, min.cells = 3)
   }
 
-  if(format == 'h5'){
-    tmp <- read.csv()
-  }
-
   if(format == 'kallisto'){
     #read in data from kallisto | bustools
     res_mat <- BUSpaRse::read_count_output(dir = data, name = 'gene', tcc = F)
