@@ -1,5 +1,5 @@
 # tamlabscpipeline
-A basic package for scRNAseq data analysis
+A basic package for scRNAseq data analysis.
 
 
 Installation instructions:
