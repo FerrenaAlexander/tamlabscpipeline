@@ -15,6 +15,7 @@ Dependencies are being tweaked / tested. but some required ones along with their
 * tidyverse vers 1.3.0
 * cowplot vers 1.0.0
 * DoubletFinder vers 2.0.2
+* MAST vers 1.12.0
 
 
 
@@ -24,4 +25,9 @@ install.packages('Seurat')
 devtools::install_github(repo = 'ChristophH/sctransform')
 install.packages("cowplot")
 devtools::install_github('chris-mcginnis-ucsf/DoubletFinder')
+
+#BioconductorPkgs
+if (!requireNamespace("BiocManager", quietly = TRUE))
+    install.packages("BiocManager")
+BiocManager::install("MAST")
 ```
