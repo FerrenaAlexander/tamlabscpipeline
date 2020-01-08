@@ -3,8 +3,8 @@
 
   packageStartupMessage('\nThank you for using this package. Checking dependencies:')
 
-  pkgs <- c("Seurat", "sctransform", "tidyverse", "cowplot", "DoubletFinder")
-  rv <- c("3.1.2", "0.2.1", "1.3.0", "1.0.0", "2.0.2")
+  pkgs <- c("Seurat", "sctransform", "tidyverse", "cowplot", "DoubletFinder", "MAST")
+  rv <- c("3.1.2", "0.2.1", "1.3.0", "1.0.0", "2.0.2", "1.12.0")
 
   for(i in 1:length(pkgs)){
 
@@ -52,8 +52,8 @@ checkdependencies <- function() {
 
   message('\nThank you for using this package. Checking dependencies:')
 
-  pkgs <- c("Seurat", "sctransform", "tidyverse", "cowplot", "DoubletFinder")
-  rv <- c("3.1.2", "0.2.1", "1.3.0", "1.0.0", "2.0.2")
+  pkgs <- c("Seurat", "sctransform", "tidyverse", "cowplot", "DoubletFinder", "MAST")
+  rv <- c("3.1.2", "0.2.1", "1.3.0", "1.0.0", "2.0.2", "1.12.0")
 
   for(i in 1:length(pkgs)){
 
