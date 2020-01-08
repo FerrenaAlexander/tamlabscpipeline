@@ -384,7 +384,7 @@ seuratpipeline <- function(data,
                 axis.ticks.x=element_blank())+
           labs(title = paste0("LibSize Cutoff"),
                subtitle = paste0(length(rownames(tmp@meta.data)), " cells total",
-                                 "; cutoff for percent mito is ", as.character(round(ncountslo, digits = 3))),
+                                 "; cutoff for libsize low is ", as.character(round(ncountslo, digits = 3))),
                caption = paste0('Mito max MAD = ', round(madmax.dist.nCount_RNA.baseline, 3) ,
                                 '\npercent.mito cutoff = ', round(ncountslo, digits = 3),
                                 '\nNum cells presubset = ', ncol(tmp),
