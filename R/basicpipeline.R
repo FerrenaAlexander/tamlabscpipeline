@@ -486,7 +486,7 @@ seuratpipeline <- function(data,
 
   ### remove the mito cluster and recluster ###
   if(removemitomaxclust == T){
-    message('\nRemoving mito cluster\n')
+    message('\nRemoving mito cluster(s)')
 
     avgstmp <- avgs
     gt <- outliers::grubbs.test(avgstmp$percent.mito)
@@ -511,7 +511,7 @@ seuratpipeline <- function(data,
     mitoclustcells <- WhichCells(tmp, idents = mitohiclusts)
     tmp <- tmp[,!(colnames(tmp) %in% mitoclustcells)]
 
-
+    message('Reclustering without mito clusters\n')
     suppressWarnings(tmp <- SCTransform(tmp, verbose = T))
 
     tmp <- RunPCA(object = tmp, verbose = F)
