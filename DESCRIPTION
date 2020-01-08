@@ -3,7 +3,7 @@ Type: Package
 Title: A basic package for scRNAseq data analysis
 Version: 0.1.0
 Author: Alexander Ferrena
-Maintainer: Alexander Ferrena <aferrena@einsteinmed.org>
+Maintainer: Alexander Ferrena <alexander.ferrena@einsteinmed.org>
 Description: This package provides easy to use basic functions
   for purpose of scRNAseq analysis.
 License: GPL-3
