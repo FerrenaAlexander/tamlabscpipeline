@@ -52,6 +52,13 @@
 #' @param jackstraw T/F; whether to perform jackstraw to score significant PCs for use in clustering / dimreduction. May be incompatible with SCT. Default is false.
 #' @param dims an integer range. Controls graph construction prior to clustering and dimensionality reduction for visualization. Connotes which PC dimensions to use in clustering. Defaults to 1:30.
 #' @param res a numeric, vector of numerics, or range of numerics. Controls assignment of cells to clusters. Connotes the "resolution" paramter used as correction in Louvain clustering. Defaults to c(0.5, 1.0, 1.5).
+#' @return will return a bunch of plots related to QC and an output in the form of a Seurat object to the standard out.
+#' @examples
+#' \dontrun{
+#' pdf('qcplots.pdf')
+#' sobj <- seuratpipeline('datafilepath.h5', format=h5)
+#' dev.off()
+#' }
 seuratpipeline <- function(data,
                            format,
                            transcript_gene_file,

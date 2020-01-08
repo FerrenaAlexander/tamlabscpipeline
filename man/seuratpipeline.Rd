@@ -62,7 +62,17 @@ seuratpipeline(
 
 \item{res}{a numeric, vector of numerics, or range of numerics. Controls assignment of cells to clusters. Connotes the "resolution" paramter used as correction in Louvain clustering. Defaults to c(0.5, 1.0, 1.5).}
 }
+\value{
+will return a bunch of plots related to QC and an output in the form of a Seurat object to the standard out.
+}
 \description{
 Basic SC pipeline for a single input dataset.
 Perform QC and clustering of an input dataset.
+}
+\examples{
+\dontrun{
+pdf('qcplots.pdf')
+sobj <- seuratpipeline('datafilepath.h5', format=h5)
+dev.off()
+}
 }
