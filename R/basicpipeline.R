@@ -482,7 +482,7 @@ seuratpipeline <- function(data,
   avgs <- aggregate(data = md, cbind(nCount_RNA , nFeature_RNA , percent.mito) ~ seurat_clusters, FUN=mean)
   rm(md)
 
-  print(VlnPlot(tmp, c('percent.mito', 'nCount_RNA', 'nFeature_RNA'), ncol=1))
+  print(VlnPlot(tmp, c('percent.mito', 'nCount_RNA', 'nFeature_RNA'), ncol=1, pt.size = 0.1))
 
   ### remove the mito cluster and recluster ###
   if(removemitomaxclust == T){
@@ -504,7 +504,7 @@ seuratpipeline <- function(data,
   #avgs <- aggregate(data = md, cbind(nCount_RNA , nFeature_RNA , percent.mito) ~ seurat_clusters, FUN=mean)
   #rm(md)
 
-  print(VlnPlot(tmp, c('percent.mito', 'nCount_RNA', 'nFeature_RNA'), ncol=1))
+  print(VlnPlot(tmp, c('percent.mito', 'nCount_RNA', 'nFeature_RNA'), ncol=1, pt.size = 0.1))
 
 
 
