@@ -14,12 +14,18 @@
 
 
     if( packageVersion(pkg) < rv[i] ){
-      msg <- paste0(msg, '\n\tWarning: tamlabscpipeline is untested below version: ', rv[i])
+      msg <- paste0(msg, ' ', sprintf('\u2715'),
+                    '\n  Warning: tamlabscpipeline is untested below version: ', rv[i])
     }
 
     if( packageVersion(pkg) > rv[i] ){
-      msg <- paste0(msg, '\n\tWarning: tamlabscpipeline is untested above version: ', rv[i],
-             "\n\tPlease contact Alex (aferrena@einsteinmed.org) about this, especially if things don't work!")
+      msg <- paste0(msg, ' ', sprintf('\u2715'),
+                    '\n  Warning: tamlabscpipeline is untested above version: ', rv[i],
+             "\n  Please contact Alex (aferrena@einsteinmed.org)")
+    }
+
+    if( packageVersion(pkg) == rv[i] ){
+      msg <- paste0(msg, ' ', sprintf('\u2714'))
     }
 
     packageStartupMessage(msg)
