@@ -4,7 +4,13 @@
 \alias{deg.acrossclusters}
 \title{Differential expression testing for clusters in a single sample}
 \usage{
-deg.acrossclusters(sobj, idents, test, latent.vars, outdir)
+deg.acrossclusters(
+  sobj,
+  idents = NULL,
+  test = NULL,
+  latent.vars = NULL,
+  outdir = NULL
+)
 }
 \arguments{
 \item{sobj}{A seurat object, usually one on which Seurat::FindClusters() has been run.}
