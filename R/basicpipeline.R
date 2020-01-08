@@ -9,27 +9,39 @@
   for(i in 1:length(pkgs)){
 
     pkg <- pkgs[i]
-    vers <- packageVersion(pkg)
-    msg <- paste0(pkg,': ',  vers, ' installed')
+    vers <- rv[i]
+    msg <- paste0(pkg,': ',  vers)
+
+    #test if pkg installed
+    if(pkg %in% rownames(installed.packages()) ){
 
 
-    if( packageVersion(pkg) < rv[i] ){
-      msg <- paste0(msg, ' ', sprintf('\u2715'),
-                    '\n  Warning: tamlabscpipeline is untested below version: ', rv[i])
-    }
 
-    if( packageVersion(pkg) > rv[i] ){
-      msg <- paste0(msg, ' ', sprintf('\u2715'),
-                    '\n  Warning: tamlabscpipeline is untested above version: ', rv[i],
-             "\n  Please contact Alex (aferrena@einsteinmed.org)")
-    }
+      #check if version installed is outdated
+      if( packageVersion(pkg) < rv[i] ){
+        msg <- paste0(msg, ' ', sprintf('\u2715'),
+                      '\n  Warning: tamlabscpipeline is untested below version: ', rv[i])
+      }
 
-    if( packageVersion(pkg) == rv[i] ){
-      msg <- paste0(msg, ' ', sprintf('\u2714'))
+      #check if installed version is above ours
+      if( packageVersion(pkg) > rv[i] ){
+        msg <- paste0(msg, ' ', sprintf('\u2715'),
+                      '\n  Warning: tamlabscpipeline is untested above version: ', rv[i],
+                      "\n  Please contact Alex (aferrena@einsteinmed.org)")
+      }
+
+      #if installed version == latest we have:
+      if( packageVersion(pkg) == rv[i] ){
+        msg <- paste0(msg, ' installed ', sprintf('\u2714'))
+      }
+
+
+    } else{
+
+      msg <- paste0(msg,  '\n\tWarning: pkg not installed or detected on your system ', sprintf('\u2715'))
     }
 
     packageStartupMessage(msg)
-
   }
 
 }
