@@ -2,18 +2,40 @@
 % Please edit documentation in R/basicpipeline.R
 \name{gseapipeline.clusters}
 \alias{gseapipeline.clusters}
-\title{A function for GSEA using the output of differential gene expression testing}
+\title{GSEA for clusters.}
 \usage{
 gseapipeline.clusters(
   inputfolder,
-  pathways,
+  pathways = NULL,
   nperm = NULL,
-  weightmethod = NULL,
   makepdf = NULL,
   pdfname = NULL,
   filter_nonsig_pathways = NULL
 )
 }
+\arguments{
+\item{inputfolder}{A string containing the path to a directory of .rds files storing dataframes outputted by Seurat::FindMarkers(). This is the format of the output of tamlabscpipeline::deg.acrossclusters().}
+
+\item{pathways}{A named "list of lists" of genes. The format of this object is important for functionality of this function and can be previewed in the tamlabscpipeline::hallmark object. The names of each list element provides the Y axis; the genes within each list element are the target genes used for GSEA. If NULL, defaults to the Msigdb's Hallmark pathways for mouse.}
+
+\item{nperm}{An integer denoting how many permutations FGSEA will run. Default = 10000.}
+
+\item{makepdf}{T/F. Whether to print to an output PDF or not. Default = F.}
+
+\item{pdfname}{A string denoting the name of putput pdf. No effect if makepdf == F. Default is 'clusterGSEA_(date).pdf'}
+
+\item{filter_nonsig_pathways}{T/F. Whether to remove non-significant rows from resulting heatmap. Useful if running very large numbers of pathways, or to generate finalized plots after exploratory analysis. Default = F.}
+}
+\value{
+Prints a heatmap to the standard out, or to a pdf.
+}
 \description{
-A function for GSEA using the output of differential gene expression testing
+A function to perform GSEA on differentially expressed gene lists from clusters. Relies for input on the output format from deg.acrossclusters(), and gene pathways in the form of named lists. Also relies on the FGSEA package by Alexey Sergushichev.
+unfortunately, currently this function only works for Mac users due to PDF encoding limitations special symbols (ie, points denoting statistical signifcance on heatmaps), but windows portability will come very soon.
+Output plots can be difficult to read if many pathways are used. Recommended 50-75 or so pathways as the maximum, many more will generate very ugly heatmaps.
+}
+\examples{
+\dontrun{
+gseapipline.clusters(inputfolder = 'deg.acrossclusters.outputdir/')
+}
 }

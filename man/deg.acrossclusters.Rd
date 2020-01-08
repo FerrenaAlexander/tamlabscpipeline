@@ -24,7 +24,7 @@ deg.acrossclusters(
 \item{outdir}{a string connoting which directory to save results in. Will create directory if it does not exist. Will not overwrite. Defaults to the following: "ClusterDEG_(Seurat object project name)_(date)_(test)"}
 }
 \value{
-Saves output files to outdir. Will not return anything else besides printing progress reports to the standard out.
+Saves output files to outdir. Output is a directory containing .rds files which store dataframes containing the output of Seurat::FindMarkers(). Will not return anything else besides printing progress reports to the standard out.
 }
 \description{
 A function to run differentially expressed gene (DEG) testing and save to disk the output in a format compatible with gseapipeline.clusters() function.

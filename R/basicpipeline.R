@@ -1290,7 +1290,7 @@ seuratpipeline <- function(data,
 #' @param test A string connoting which DEG test to perform. See ?Seurat::FindMarkers() for details on options. Defaults to "MAST".
 #' @param latent.vars A string or character vector referring to which columns to use a "latent variables", which some of the tests will attempt to regress out the effect of. Some tests (such as MAST) can only perform this for quantitative, continuous variables. Defaults to ('nFeature_RNA', 'nCount_RNA', 'percent.mito').
 #' @param outdir a string connoting which directory to save results in. Will create directory if it does not exist. Will not overwrite. Defaults to the following: "ClusterDEG_(Seurat object project name)_(date)_(test)"
-#' @return Saves output files to outdir. Will not return anything else besides printing progress reports to the standard out.
+#' @return Saves output files to outdir. Output is a directory containing .rds files which store dataframes containing the output of Seurat::FindMarkers(). Will not return anything else besides printing progress reports to the standard out.
 #' @examples
 #' \dontrun{
 #' pdf('qcplots.pdf')
@@ -1356,29 +1356,38 @@ deg.acrossclusters <- function(sobj,
 # GSEA using DEGs from clusters ---------------------------
 #' GSEA for clusters.
 #'
-#' A function to perform GSEA on differentially expressed gene lists from clusters. Relies for input on the output format from deg.acrossclusters(), and gene pathways in the form of named lists. Also relies on the FGSEA package
-
-#' @return Saves output files to outdir. Will not return anything else besides printing progress reports to the standard out.
+#' A function to perform GSEA on differentially expressed gene lists from clusters. Relies for input on the output format from deg.acrossclusters(), and gene pathways in the form of named lists. Also relies on the FGSEA package by Alexey Sergushichev.
+#' unfortunately, currently this function only works for Mac users due to PDF encoding limitations special symbols (ie, points denoting statistical signifcance on heatmaps), but windows portability will come very soon.
+#' Output plots can be difficult to read if many pathways are used. Recommended 50-75 or so pathways as the maximum, many more will generate very ugly heatmaps.
+#' @param inputfolder A string containing the path to a directory of .rds files storing dataframes outputted by Seurat::FindMarkers(). This is the format of the output of tamlabscpipeline::deg.acrossclusters().
+#' @param pathways A named "list of lists" of genes. The format of this object is important for functionality of this function and can be previewed in the tamlabscpipeline::hallmark object. The names of each list element provides the Y axis; the genes within each list element are the target genes used for GSEA. If NULL, defaults to the Msigdb's Hallmark pathways for mouse.
+#' @param nperm An integer denoting how many permutations FGSEA will run. Default = 10000.
+#' @param makepdf T/F. Whether to print to an output PDF or not. Default = F.
+#' @param pdfname A string denoting the name of putput pdf. No effect if makepdf == F. Default is 'clusterGSEA_(date).pdf'
+#' @param filter_nonsig_pathways T/F. Whether to remove non-significant rows from resulting heatmap. Useful if running very large numbers of pathways, or to generate finalized plots after exploratory analysis. Default = F.
+#' @return Prints a heatmap to the standard out, or to a pdf.
 #' @examples
 #' \dontrun{
-#' pdf('qcplots.pdf')
-#' deg.acrossclusters(sobj = sobj)
-#' dev.off()
+#' gseapipline.clusters(inputfolder = 'deg.acrossclusters.outputdir/')
 #' }
 gseapipeline.clusters <- function(inputfolder,
-                                  pathways,
+                                  pathways=NULL,
                                   nperm=NULL,
-                                  weightmethod=NULL,
+                                  #weightmethod=NULL,
                                   makepdf=NULL,
                                   pdfname=NULL,
                                   filter_nonsig_pathways=NULL){
 
   set.seed(500)
 
+  if(is.null( pathways )) {pathways <- tamlabscpipeline::hallmark}
   if(is.null( nperm )) {nperm <- 10000}
-  if(is.null( weightmethod )) {weightmethod <- 'pvalue'}
+  #if(is.null( weightmethod )) {weightmethod <- 'pvalue'}
+  weightmethod <- 'pvalue'
   if(is.null( makepdf )) { makepdf <- F}
   if(is.null( filter_nonsig_pathways )) {filter_nonsig_pathways <- F}
+  if(is.null( pdfname )) { pdfname <- paste0('clusterGSEA_', Sys.Date(), '.pdf') }
+
 
   if( makepdf == T) {quartz(type = 'pdf', file = pdfname, width = 8)}
 
