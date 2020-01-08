@@ -45,7 +45,10 @@
 
 }
 
-checkdependencies <- function(libname, pkgname) {
+#' Check if Dependencies are installed
+#'
+#' A function to check if dependencies are installed. Installed dependncies must be loaded manually.
+checkdependencies <- function() {
 
   message('\nThank you for using this package. Checking dependencies:')
 
