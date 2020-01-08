@@ -1328,12 +1328,14 @@ deg.acrossclusters <- function(sobj,
     #test if file exists
     if( !file.exists( paste0(outdir, "/markers_cluster", cluster, ".rds") ) ){
 
-      tmp <- FindMarkers(object = sobj, test.use = test, ident.1 = cluster,
-                         assay = 'SCT', slot = 'data', verbose = T,
-                         logfc.threshold = -Inf, min.pct = -Inf, min.diff.pct = -Inf,
-                         latent.vars = latent.vars)
+      suppressWarnings(
+        tmp <- FindMarkers(object = sobj, test.use = test, ident.1 = cluster,
+                           assay = 'SCT', slot = 'data', verbose = T,
+                           logfc.threshold = -Inf, min.pct = -Inf, min.diff.pct = -Inf,
+                           latent.vars = latent.vars)
+      )
 
-      saveRDS(tmp, file = paste0(outdir, "/markers_cluster", i, ".rds"))
+      saveRDS(tmp, file = paste0(outdir, "/markers_cluster", cluster, ".rds"))
 
     }else{ message('\t', 'Cluster ', cluster, ' already completed ', sprintf('\u2714')) }
 
@@ -1352,7 +1354,9 @@ deg.acrossclusters <- function(sobj,
 
 
 # GSEA using DEGs from clusters ---------------------------
-#' A function for GSEA using the output of differential gene expression testing
+#' GSEA for clusters.
+#'
+#' A function to perform GSEA on differentially expressed gene lists from clusters. Relies for input on the output format from deg.acrossclusters(), and gene pathways in the form of named lists. Also relies on the FGSEA package
 gseapipeline.clusters <- function(inputfolder,
                                   pathways,
                                   nperm=NULL,
