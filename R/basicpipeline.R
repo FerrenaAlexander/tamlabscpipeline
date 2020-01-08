@@ -1281,22 +1281,67 @@ seuratpipeline <- function(data,
 
 
 # DEGs from each clusters, output compatible with GSEA fxn ---------------
+#' Differential expression testing for clusters in a single sample
+#'
+#' A function to run differentially expressed gene (DEG) testing and save to disk the output in a format compatible with gseapipeline.clusters() function.
+#' This function takes a while. To help deal with the risk of interruptions, this function is written in a way that tries to pick up where previously left off if stopped part-way through.
+#' @param sobj A seurat object, usually one on which Seurat::FindClusters() has been run.
+#' @param idents A string referring to a categorical column of the seurat metadata, such as the output of Seurat::FindClusters(). Defaults to 'seurat_project'.
+#' @param test A string connoting which DEG test to perform. See ?Seurat::FindMarkers() for details on options. Defaults to "MAST".
+#' @param latent.vars A string or character vector referring to which columns to use a "latent variables", which some of the tests will attempt to regress out the effect of. Some tests (such as MAST) can only perform this for quantitative, continuous variables. Defaults to ('nFeature_RNA', 'nCount_RNA', 'percent.mito').
+#' @param outdir a string connoting which directory to save results in. Will create directory if it does not exist. Will not overwrite. Defaults to the following: "ClusterDEG_(Seurat object project name)_(date)_(test)"
+#' @return Saves output files to outdir. Will not return anything else besides printing progress reports to the standard out.
+#' @examples
+#' \dontrun{
+#' pdf('qcplots.pdf')
+#' deg.acrossclusters(sobj = sobj)
+#' dev.off()
+#' }
+deg.acrossclusters <- function(sobj, idents, test, latent.vars, outdir){
 
-deg.acrossclusters <- function(sobj, ){
+  if(is.null( test )) {test <- "MAST"}
+  if(is.null( idents )) {idents <- "seurat_clusters"}
 
+  if(is.null( latent.vars )) {latent.vars <- c('nFeature_RNA', 'nCount_RNA', 'percent.mito') }
+
+  if(is.null( outdir )) {outdir <- paste0('clusterDEG_', sobj@project.name, '_', Sys.Date(), '_', test) }
+  if(!dir.exists(outdir)){dir.create(outdir)}
+
+  #check if input ident is already the active ident; fix if not; will reset later if not.
+  if( !(identical(as.vector(sobj@meta.data[,idents]), as.vector(sobj@active.ident)) ) ){
+    ditest = T
+    di <- sobj@active.ident
+    sobj <- SetIdent(sobj, value = sobj@meta.data[,idents])
+  }
+
+  #set default assay to SCT, reset to previous later
+  da <- DefaultAssay(sobj)
   DefaultAssay(sobj) <- 'SCT'
 
-  for(i in levels(sobj@active.ident) ){
-    message('\nDEG for cluster ', i, ':\n')
-    tmp <- FindMarkers(object = sobj, test.use = "LR", ident.1 = i,
-                       assay = 'SCT', slot = 'data', verbose = T,
-                       logfc.threshold = -Inf, min.pct = -Inf, min.diff.pct = -Inf,
-                       latent.vars = c('nFeature_SCT', 'nCount_SCT', 'percent.mito'))
+  for(cluster in levels(sobj@active.ident) ){
+    message('\nDEG for cluster ', cluster, ':')
 
-    #tmp <- tmp[-grep("tdtomato", rownames(tmp)),1:2]
-    saveRDS(tmp, file = paste0("clusters_LR/markers_cluster", i, ".rds"))
+    #test if file exists
+    if( !file.exists( paste0(outdir, "/markers_cluster", cluster, ".rds") ) ){
+
+      tmp <- FindMarkers(object = sobj, test.use = test, ident.1 = cluster,
+                         assay = 'SCT', slot = 'data', verbose = T,
+                         logfc.threshold = -Inf, min.pct = -Inf, min.diff.pct = -Inf,
+                         latent.vars = latent.vars)
+
+      saveRDS(tmp, file = paste0(outdir, "/markers_cluster", i, ".rds"))
+
+    }else{ message('\t', 'Cluster ', cluster, ' already completed ', sprintf('\u2714')) }
 
   }
+  #return to defaults
+  DefaultAssay(sobj) <- da
+
+  if( ditest == T ){
+
+    sobj <- SetIdent(sobj, value = di)
+  }
+
 }
 
 
