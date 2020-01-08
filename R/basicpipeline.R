@@ -1357,6 +1357,14 @@ deg.acrossclusters <- function(sobj,
 #' GSEA for clusters.
 #'
 #' A function to perform GSEA on differentially expressed gene lists from clusters. Relies for input on the output format from deg.acrossclusters(), and gene pathways in the form of named lists. Also relies on the FGSEA package
+
+#' @return Saves output files to outdir. Will not return anything else besides printing progress reports to the standard out.
+#' @examples
+#' \dontrun{
+#' pdf('qcplots.pdf')
+#' deg.acrossclusters(sobj = sobj)
+#' dev.off()
+#' }
 gseapipeline.clusters <- function(inputfolder,
                                   pathways,
                                   nperm=NULL,
