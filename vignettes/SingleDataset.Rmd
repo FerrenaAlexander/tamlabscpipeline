@@ -19,17 +19,18 @@ knitr::opts_chunk$set(
 
 Let's assume you have a dataset at the ready. I will try to provide a small example dataset for reproducible tutorials in the future.
 
-first load up the package and dependencies.
+first load up the package and dependencies. running `library(tamlabscpipeline)` will check your versions of the required packages to against the latest tested versions and issue warnings if you are behind / ahead of the latest test.
 
 ```{r setup}
 #install.packages("devtools") #if devtools not already installed
 #devtools::install_github('apf2139/tamlabscpipeline')
-library(tamlabscpipeline)
 library(Seurat)
 library(sctransform)
 library(tidyverse)
 library(cowplot)
 library(DoubletFinder)
+
+library(tamlabscpipeline)
 ```
 
 
@@ -42,12 +43,18 @@ Here is a quick start for launching the analysis pipeline using this function. I
 The command prints out a bunch of plots for QC purposes, so best to wrap it in a pdf command block.
 
 
-```{r seuratpipeline}
-#pdf('testrun.pdf')
+```
+pdf('testrun.pdf')
 
-##sobj <- seuratpipeline(data = filepath, #path to dataset
-#               format = h5 #format; dir or H5
+sobj <- seuratpipeline(data = filepath, #path to dataset
+               format = h5 #format; dir or H5
                
-#               )
+               )
+
+dev.off()
 
 ```
+
+
+There are some major improvements over the previous versions, including much better cell QC (more accrurately removing low-quality cells while being nicer to okay-quality cells). Also, there have been important changes made to clean up the code, remove unnecesarry options, optimize speed, and retain full scaled.data matrices at the final output.
+
