@@ -10,7 +10,7 @@ devtools::install_github('apf2139/tamlabscpipeline')
 
 Dependencies are being tweaked / tested. but some required ones along with their versions include:
 
-* Seurat vers 3.1.3
+* Seurat vers 3.1.2
 * sctransform vers 0.2.1
 * tidyverse vers 1.3.0
 * cowplot vers 1.0.0
