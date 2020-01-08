@@ -1,3 +1,96 @@
+#check deps ---------------------------
+.onAttach <- function(libname, pkgname) {
+
+  packageStartupMessage('\nThank you for using this package. Checking dependencies:')
+
+  pkgs <- c("Seurat", "sctransform", "tidyverse", "cowplot", "DoubletFinder")
+  rv <- c("3.1.2", "0.2.1", "1.3.0", "1.0.0", "2.0.2")
+
+  for(i in 1:length(pkgs)){
+
+    pkg <- pkgs[i]
+    msg <- paste0(pkg,': ',  rv[i])
+
+    #test if pkg installed
+    if(pkg %in% rownames(installed.packages()) ){
+
+
+
+      #check if version installed is outdated
+      if( packageVersion(pkg) < rv[i] ){
+        msg <- paste0(msg, ' ', sprintf('‽'),
+                      '\n  Warning: tamlabscpipeline is untested below version: ', rv[i])
+      }
+
+      #check if installed version is above ours
+      if( packageVersion(pkg) > rv[i] ){
+        msg <- paste0(msg, ' ', sprintf('‽'),
+                      '\n  Warning: tamlabscpipeline is untested above version: ', rv[i],
+                      "\n  Please contact Alex (alexander.ferrena@einsteinmed.org)")
+      }
+
+      #if installed version == latest we have:
+      if( packageVersion(pkg) == rv[i] ){
+        msg <- paste0(msg, ' installed ', sprintf('\u2714'))
+      }
+
+
+    } else{
+
+      msg <- paste0(msg,' ',  sprintf('\u2715'), '\n\tWarning: pkg not installed or detected on your system ')
+    }
+
+    packageStartupMessage(msg)
+  }
+
+}
+
+checkdependencies <- function(libname, pkgname) {
+
+  message('\nThank you for using this package. Checking dependencies:')
+
+  pkgs <- c("Seurat", "sctransform", "tidyverse", "cowplot", "DoubletFinder")
+  rv <- c("3.1.2", "0.2.1", "1.3.0", "1.0.0", "2.0.2")
+
+  for(i in 1:length(pkgs)){
+
+    pkg <- pkgs[i]
+    msg <- paste0(pkg,': ',  rv[i])
+
+    #test if pkg installed
+    if(pkg %in% rownames(installed.packages()) ){
+
+
+
+      #check if version installed is outdated
+      if( packageVersion(pkg) < rv[i] ){
+        msg <- paste0(msg, ' ', sprintf('‽'),
+                      '\n  Warning: tamlabscpipeline is untested below version: ', rv[i])
+      }
+
+      #check if installed version is above ours
+      if( packageVersion(pkg) > rv[i] ){
+        msg <- paste0(msg, ' ', sprintf('‽'),
+                      '\n  Warning: tamlabscpipeline is untested above version: ', rv[i],
+                      "\n  Please contact Alex (alexander.ferrena@einsteinmed.org)")
+      }
+
+      #if installed version == latest we have:
+      if( packageVersion(pkg) == rv[i] ){
+        msg <- paste0(msg, ' installed ', sprintf('\u2714'))
+      }
+
+
+    } else{
+
+      msg <- paste0(msg,' ',  sprintf('\u2715'), '\n\tWarning: pkg not installed or detected on your system ')
+    }
+
+    message(msg)
+  }
+
+}
+
 #grubbs test for outliers ------------------------------------
 #' a test for outliers assuming normal distribution.
 #' based on the grubbs.test() function from the outliers pkg by Lukasz Komsta
