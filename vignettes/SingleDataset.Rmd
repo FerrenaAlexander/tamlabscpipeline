@@ -55,6 +55,38 @@ dev.off()
 
 ```
 
+This function is designed to give a rough but pretty good minimum initial clustering across different datasets. On a 2018 MacBook Pro this took roughly 20 minutes. In that time, you can read the rest of this vignette for more details about this function and how to further assess the quality of your dataset; think about some hypotheses you'd like to explore in your data;  and ponder the precarious global geopolitical situation we find ourselves living in.
+
+***
+
+By default, this function will perform QC and clustering of the data. Default QC steps are as follows:
+
+1. First-pass clustering involving normalization via SCT and Louvain clustering in Seurat with default parameters.
+2. Identification and removal of mitochondrial cluster. Without any prefiltering, there will almost certainly be a cluster strongly driven by mitochondrial RNA content.
+  + this step will generate two violin plots; one before removal and one after removal and reclustering.
+3. Second-pass clustering after mito cluster removal. Iterative library size filtering.
+  + By default, the second-pass clustering step now only involves clustering based on minimum library size. Proper thesholds for minimum library size are based on median absolute deviation thresholds which are learnt directly from the data.
+  + Filtering will not take place if the cluster size is below a minimum arbitrary threshold (100 cells), as Med.Abs.Dev. learning performs quite poorly with smaller cell numbers.
+  + this step will generate two visualizations for each cluster: one showing the Med.Abs.Dev. threshold learnt for that cluster, the second showing the actual cutoff point denoted by this threshold. Plots will be generated even for clusters of under 100 cells, but these clusters will not actually be subjected to lib size filtration.
+4. Third-pass clustering. This will involve the identification and removal of doublets. Doublet identification relies on [DoubletFinder](https://www.sciencedirect.com/science/article/abs/pii/S2405471219300730)
+  + this will generate a line-graph containing very little information that you can and should ignore. This step also performs its own multi-pass clustering steps using default parameters.
+5. Cell cycle scores will be calculated. By default, there will be no automatic cell cycle correction, as this can vary from dataset to dataset and should be assessed manually.
+6. A finalized normalization and clustering step using SCT and Seurat Louvain clustering will take place.
+7. The function will return a Seurat object containing fully normalized and scaled matrices; clustering assignments; and dimensionality reduction embeddings, including PCA, tSNE and UMAP.
+
+
+
+#### Here are some suggestions for assessing dataset quality.
+
+``` {r}
+
+FeaturePlot(sobj, c('nCount_RNA', 'percent.mito', 'S.Score', 'G2M.Score'))
+
+VlnPlot(sobj, c('nCount_RNA', 'nFeature_RNA', 'percent.mito'), ncol = 1)
+
+```
+
+
+***
 
 There are some major improvements over the previous versions, including much better cell QC (more accrurately removing low-quality cells while being nicer to okay-quality cells). Also, there have been important changes made to clean up the code, remove unnecesarry options, optimize speed, and retain full scaled.data matrices at the final output.
-
