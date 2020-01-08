@@ -44,7 +44,7 @@ seuratpipeline(
 
 \item{madmax.dist.nCount_RNA.baseline}{a numeric, or a string reading 'predict'. If numeric is provided, will use this as median absolute deviation threshold for global libsize cutoff. If set to 'predict', will attempt to learn cutoff from data. Default = 'predict'}
 
-\item{removemitomaxclust}{T/F ; whether to remove the mito max cluster after first-pass clustering; if no baseline mito filtration is used, there will almost certainly be a mito-driven cluster. Default is True.}
+\item{removemitomaxclust}{T/F ; whether to identify and remove abnormally high mitochondrial content clusters after first-pass clustering; if no baseline mito filtration is used, there will almost certainly be a mito-driven cluster. Identification is via Grubbs' test for outliers, based on Lukasz Komsta's implementation in the outliers package. Default is True.}
 
 \item{iterativefilter}{T/F ; whether to perform iterative filtering on first-pass filtering. Default is True.}
 
