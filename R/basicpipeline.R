@@ -876,7 +876,7 @@ seuratpipeline <- function(data,
 
         #remove objects
         rm(abs.dev, bad, left.mad, m, x, x.mad,
-           two.sided.mad, mad.distance,  ncountslo,
+           mad.distance,  ncountslo,
            madmax.dist.nCount_RNA)
 
       } #end left iterative lib size filt
