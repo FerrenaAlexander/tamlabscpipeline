@@ -1,4 +1,5 @@
 #grubbs test for outliers ------------------------------------
+#' a test for outliers assuming normal distribution.
 #' based on the grubbs.test() function from the outliers pkg by Lukasz Komsta
 grubbs <- function (x, type = 10, opposite = FALSE, two.sided = FALSE)
 {

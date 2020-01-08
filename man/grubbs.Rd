@@ -2,10 +2,12 @@
 % Please edit documentation in R/supplement.R
 \name{grubbs}
 \alias{grubbs}
-\title{based on the grubbs.test() function from the outliers pkg by Lukasz Komsta}
+\title{a test for outliers assuming normal distribution.
+based on the grubbs.test() function from the outliers pkg by Lukasz Komsta}
 \usage{
 grubbs(x, type = 10, opposite = FALSE, two.sided = FALSE)
 }
 \description{
+a test for outliers assuming normal distribution.
 based on the grubbs.test() function from the outliers pkg by Lukasz Komsta
 }
