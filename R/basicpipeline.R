@@ -1297,10 +1297,14 @@ seuratpipeline <- function(data,
 #' deg.acrossclusters(sobj = sobj)
 #' dev.off()
 #' }
-deg.acrossclusters <- function(sobj, idents, test, latent.vars, outdir){
+deg.acrossclusters <- function(sobj,
+                               idents=NULL,
+                               test=NULL,
+                               latent.vars=NULL,
+                               outdir=NULL){
 
-  if(is.null( test )) {test <- "MAST"}
   if(is.null( idents )) {idents <- "seurat_clusters"}
+  if(is.null( test )) {test <- "MAST"}
 
   if(is.null( latent.vars )) {latent.vars <- c('nFeature_RNA', 'nCount_RNA', 'percent.mito') }
 
