@@ -19,12 +19,17 @@ knitr::opts_chunk$set(
 
 Let's assume you have a dataset at the ready. I will try to provide a small example dataset for reproducible tutorials in the future.
 
-first load up the package. 
+first load up the package and dependencies.
 
 ```{r setup}
 #install.packages("devtools") #if devtools not already installed
 #devtools::install_github('apf2139/tamlabscpipeline')
 library(tamlabscpipeline)
+library(Seurat)
+library(sctransform)
+library(tidyverse)
+library(cowplot)
+library(DoubletFinder)
 ```
 
 

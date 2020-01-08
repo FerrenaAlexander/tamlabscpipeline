@@ -1,3 +1,34 @@
+#check deps ---------------------------
+.onAttach <- function(libname, pkgname) {
+
+  packageStartupMessage('\nThank you for using this package. Checking dependencies:')
+
+  pkgs <- c("Seurat", "sctransform", "tidyverse", "cowplot", "DoubletFinder")
+  rv <- c("3.1.2", "0.2.1", "1.3.0", "1.0.0", "2.0.2")
+
+  for(i in 1:length(pkgs)){
+
+    pkg <- pkgs[i]
+    vers <- packageVersion(pkg)
+    msg <- paste0(pkg,': ',  vers, ' installed')
+
+
+    if( packageVersion(pkg) < rv[i] ){
+      msg <- paste0(msg, '\n\tWarning: tamlabscpipeline is untested below version: ', rv[i])
+    }
+
+    if( packageVersion(pkg) > rv[i] ){
+      msg <- paste0(msg, '\n\tWarning: tamlabscpipeline is untested above version: ', rv[i],
+             "\n\tPlease contact Alex (aferrena@einsteinmed.org) about this, especially if things don't work!")
+    }
+
+    packageStartupMessage(msg)
+
+  }
+
+}
+
+
 # Process single dataset ---------------------------
 #'Basic SC Pipeline for QC and clustering
 #'
