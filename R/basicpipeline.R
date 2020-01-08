@@ -487,7 +487,28 @@ seuratpipeline <- function(data,
   ### remove the mito cluster and recluster ###
   if(removemitomaxclust == T){
     message('\nRemoving mito cluster\n')
-    mitoclustcells <- WhichCells(tmp, idents = which.max(avgs$percent.mito)-1)
+
+    avgstmp <- avgs
+    gt <- outliers::grubbs.test(avgstmp$percent.mito)
+
+    #grubbs test while loop for right-tail outliers, w/ bonferroni correction
+    iter=1
+    while(
+      str_split(gt$alternative, ' ')[[1]][1] == 'highest' &
+      gt$p.value < (0.05 / nrow(avgstmp))
+    ) {
+      message('\tgrubbs outlier test iteration: ',iter)
+
+      avgstmp <- avgstmp[-which.max(avgstmp$percent.mito),]
+
+      gt <- grubbs(avgstmp$percent.mito)
+
+      iter=iter+1
+    }
+
+    mitohiclusts <- as.vector(avgs$seurat_clusters[!(avgs$seurat_clusters %in% avgstmp$seurat_clusters)])
+
+    mitoclustcells <- WhichCells(tmp, idents = mitohiclusts)
     tmp <- tmp[,!(colnames(tmp) %in% mitoclustcells)]
 
 
