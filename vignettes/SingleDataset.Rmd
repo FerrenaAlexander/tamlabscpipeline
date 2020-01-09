@@ -86,12 +86,6 @@ gseapipeline.clusters(inputfolder = degdir)
 
 ```
 
-On a dataset of ~17,000 genes x ~5,500 cells using a 2018 MacBook Pro this took roughly 4 hours, without parallelization. See bottom notes for parallelization suggestions.
-
-* `seuratpipeline()` takes roughly 20 mins
-* `deg.acrossclusters()` takes roughly 3 hours and 45 mins; this function has been written such that it can pick up where left off if interrupted
-* `gseapipeline.clusters()` takes roughly 10 seconds.
-
 Altogether, these functions will return:
 
 * an analyzed Seurat object named "sobj"; 
@@ -99,6 +93,12 @@ Altogether, these functions will return:
 * a directory with differentially expressed genes for each cluster; 
 * and a heatmap printed to the standard out showing GSEA results for the clusters against the Broad's Hallmark Pathways. Default Hallmark GSEA (and cell-type scoring) utilize mouse gene symbols, although human symbols can be used without any problems for GSEA with human data input (and human cell-type scoring will be implemented soon).
 
+
+On a dataset of ~17,000 genes x ~5,500 cells using a 2018 MacBook Pro this took roughly 4 hours. Plenty of time to read the rest of this vignette for more details on the underlying methods and how to further assess the quality of your dataset; think about some hypotheses you'd like to explore in your data;  and ponder the precarious global geopolitical situation we find ourselves living in.
+
+* `seuratpipeline()` takes roughly 20 mins
+* `deg.acrossclusters()` takes roughly 3 hours and 45 mins; this function has been written such that it can pick up where left off if interrupted
+* `gseapipeline.clusters()` takes roughly 10 seconds.
 
 See below for further details and ideas for QC, data exploration and analysis.
 
@@ -164,7 +164,7 @@ dev.off()
 
 ```
 
-This function is designed to give a rough but pretty good minimum initial clustering across different datasets. On a dataset of ~17,000 genes x ~5,500 cells using a 2018 MacBook Pro this took roughly 20 minutes. In that time, you can read the rest of this vignette for more details about this function and how to further assess the quality of your dataset; think about some hypotheses you'd like to explore in your data;  and ponder the precarious global geopolitical situation we find ourselves living in.
+This function is designed to give a rough but pretty good minimum initial clustering across different datasets. On a dataset of ~17,000 genes x ~5,500 cells using a 2018 MacBook Pro this took roughly 20 minutes.
 
 
 
@@ -258,7 +258,7 @@ deg.acrossclusters(sobj,
 
 
 This function will save output files to `outdir`. Output is a directory containing .rds files which store dataframes containing the output of Seurat::FindMarkers(). This function takes a while. To help deal with the risk of interruptions, this function is written in a way that tries to pick up where previously left off if stopped part-way through; simply recall the original invocation and it will try to pickup where left off.
-On the same dataset mentioned previously (15982 genes x 3522 cells post filtration) and 24 clusters, using a MacBookPro 2018 without parallelization, this took ~3 hours and 45 mins. 
+On the same dataset mentioned previously (15982 genes x 3522 cells post filtration) and 24 clusters, using a MacBookPro 2018, this took ~3 hours and 45 mins. 
 
 ***
 
@@ -316,9 +316,7 @@ There have been some major improvements over the previous versions, including mu
 
 ### Parallelization
 
-Parallelization can be utilized to greatly increase the speed of various steps of the pipeline. Parallelization can be implemented using the `future` package. Special thanks to the Seurat developers for making their functions parallelizable.
-
-
+Parallelization should increase the speed of all functions. Parallelization is in the works.
 
 
 
