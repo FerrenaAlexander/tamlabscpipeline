@@ -3,13 +3,20 @@
 
   packageStartupMessage('\nThank you for using this package. Checking dependencies:')
 
-  pkgs <- c("Seurat", "sctransform", "ecp", "tidyverse", "cowplot", "DoubletFinder", "MAST (suggested)", "fgsea")
+  pkgs <- c("Seurat", "sctransform", "ecp", "tidyverse", "cowplot", "DoubletFinder", "MAST", "fgsea")
   rv <- c("3.1.2", "0.2.1", "3.1.2", "1.3.0", "1.0.0", "2.0.2", "1.12.0", "1.12.0")
+
+  suggests <- c("MAST")
 
   for(i in 1:length(pkgs)){
 
     pkg <- pkgs[i]
     msg <- paste0(pkg,': ',  rv[i])
+
+    if(pkg %in% suggests){
+      msg <- paste0(msg, ' (suggested);')
+    }
+
 
     #test if pkg installed
     if(pkg %in% rownames(installed.packages()) ){
@@ -52,13 +59,19 @@ checkdependencies <- function() {
 
   message('\nThank you for using this package. Checking dependencies:')
 
-  pkgs <- c("Seurat", "sctransform", "ecp", "tidyverse", "cowplot", "DoubletFinder", "MAST (suggested)", "fgsea")
+  pkgs <- c("Seurat", "sctransform", "ecp", "tidyverse", "cowplot", "DoubletFinder", "MAST", "fgsea")
   rv <- c("3.1.2", "0.2.1", "3.1.2", "1.3.0", "1.0.0", "2.0.2", "1.12.0", "1.12.0")
+
+  suggests <- c("MAST")
 
   for(i in 1:length(pkgs)){
 
     pkg <- pkgs[i]
     msg <- paste0(pkg,': ',  rv[i])
+
+    if(pkg %in% suggests){
+      msg <- paste0(msg, ' (suggested);')
+    }
 
     #test if pkg installed
     if(pkg %in% rownames(installed.packages()) ){
