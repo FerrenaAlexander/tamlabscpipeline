@@ -30,4 +30,5 @@ devtools::install_github('chris-mcginnis-ucsf/DoubletFinder')
 if (!requireNamespace("BiocManager", quietly = TRUE))
     install.packages("BiocManager")
 BiocManager::install("MAST")
+BiocManager::install("fgsea")
 ```
