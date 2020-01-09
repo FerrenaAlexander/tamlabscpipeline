@@ -452,7 +452,7 @@ seuratpipeline <- function(data,
     message('\nRemoving mito cluster(s)')
 
     avgstmp <- avgs
-    gt <- outliers::grubbs.test(avgstmp$percent.mito)
+    gt <- grubbs(avgstmp$percent.mito)
 
     #grubbs test while loop for right-tail outliers, w/ bonferroni correction
     iter=1
