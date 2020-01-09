@@ -79,6 +79,7 @@ seuratpipeline <- function(data,
   if(is.null( dims )) {dims <- 1:30}
   if(is.null( res )) {res <- c(0.5, 1.5, 1)}
 
+  message('Reading in ', project, ' from file: ', data)
 
   #read in
   if(format == 'dir'){
@@ -127,7 +128,8 @@ seuratpipeline <- function(data,
                               min.cells = 3, min.features = 200)
   }
 
-  message('Reading in ', project ,'; num cells = ', ncol(tmp)  , '\n')
+  message('\tnum genes = ', nrow(tmp) , '\n',
+          '\tnum cells = ', ncol(tmp)  , '\n')
 
 
   #mito content, add to metadata
