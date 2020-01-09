@@ -12,7 +12,15 @@ LazyData: true
 RoxygenNote: 7.0.2
 URL: https://github.com/apf2139/tamlabscpipeline
 BugReports: https://github.com/apf2139/tamlabscpipeline/issues
+Imports:
+  Seurat,
+  sctransform,
+  ecp,
+  cowplot,
+  DoubletFinder,
+  fgsea
 Suggests: 
     knitr,
-    rmarkdown
+    rmarkdown,
+    MAST
 VignetteBuilder: knitr
