@@ -27,7 +27,7 @@ This vignette will provide guidance for analysis of an individual single-cell RN
 #### Package installation:
 ```
 install.packages("devtools") #if devtools not already installed
-devtools::install_github('apf2139/tamlabscpipeline')
+devtools::install_github('apf2139/tamlabscpipeline', build_vignettes = T)
 ```
 #### Dependency installation:
 ```
