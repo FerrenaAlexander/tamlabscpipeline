@@ -32,3 +32,6 @@ if (!requireNamespace("BiocManager", quietly = TRUE))
 BiocManager::install("MAST")
 BiocManager::install("fgsea")
 ```
+
+
+A big thank you to to the developers of these packages, especially the Satija lab (Seurat); Gottardo lab (MAST); Chris McGinnis and the Gartner lab (DoubletFinder); and Alexey Sergushichev (fgsea). Also, thanks to Peer lab at MSKCC; Zheng lab at Einstein (Dr.s Deyou Zheng and Yang Liu); and all the members of the Tammela lab.
