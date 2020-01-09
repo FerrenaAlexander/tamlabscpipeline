@@ -17,6 +17,7 @@ Dependencies are being tweaked / tested. but some required ones along with their
 
 * Seurat vers 3.1.2
 * sctransform vers 0.2.1
+* ecp verse 3.1.2
 * tidyverse vers 1.3.0
 * cowplot vers 1.0.0
 * DoubletFinder vers 2.0.2
@@ -29,6 +30,7 @@ Dependencies are being tweaked / tested. but some required ones along with their
 install.packages("tidyverse")
 install.packages('Seurat')
 devtools::install_github(repo = 'ChristophH/sctransform')
+install.packages("ecp")
 install.packages("cowplot")
 devtools::install_github('chris-mcginnis-ucsf/DoubletFinder')
 
