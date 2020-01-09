@@ -1,3 +1,5 @@
+<img src="vignettes/embed/dolphins.jpg" width="300" height="250">
+
 # tamlabscpipeline
 A basic package for scRNAseq data analysis.
 
