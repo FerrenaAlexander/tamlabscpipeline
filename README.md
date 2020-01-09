@@ -18,6 +18,7 @@ Dependencies are being tweaked / tested. but some required ones along with their
 * cowplot vers 1.0.0
 * DoubletFinder vers 2.0.2
 * MAST vers 1.12.0
+* fgsea vers 1.12.0
 
 
 
