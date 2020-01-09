@@ -21,7 +21,7 @@ Dependencies are being tweaked / tested. but some required ones along with their
 * tidyverse vers 1.3.0
 * cowplot vers 1.0.0
 * DoubletFinder vers 2.0.2
-* MAST vers 1.12.0
+* MAST (suggested) vers 1.12.0
 * fgsea vers 1.12.0
 
 
