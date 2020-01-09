@@ -2,6 +2,7 @@
 title: "SingleDataset"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
+author: Alexander Ferrena
 vignette: >
   %\VignetteIndexEntry{SingleDataset}
   %\VignetteEngine{knitr::rmarkdown}
@@ -15,26 +16,34 @@ knitr::opts_chunk$set(
 )
 ```
 
-# This vignette will provide guidance for analysis of a single dataset.
+Contact: alexander.ferrena@einsteinmed.org
 
 
-#### package installation:
+
+# Single Dataset Analysis
+
+This vignette will provide guidance for analysis of an individual single-cell RNAseq (scRNAseq) dataset.
+
+#### Package installation:
 ```
 install.packages("devtools") #if devtools not already installed
 devtools::install_github('apf2139/tamlabscpipeline')
 ```
-#### dependency installation:
+#### Dependency installation:
 ```
 install.packages("tidyverse")
 install.packages('Seurat')
 devtools::install_github(repo = 'ChristophH/sctransform')
 install.packages("cowplot")
 devtools::install_github('chris-mcginnis-ucsf/DoubletFinder')
+
+#BioconductorPkgs
+if (!requireNamespace("BiocManager", quietly = TRUE))
+    install.packages("BiocManager")
+BiocManager::install("MAST")
 ```
 
-### startup
-
-Let's assume you have a dataset at the ready. I will try to provide a small example dataset for reproducible tutorials in the future.
+### Startup
 
 First, load up the package and dependencies. running `library(tamlabscpipeline)` will examine the depencies and compare your versions with the latest known compatible versions for `tamlabscpipeline` and issue warnings if you are behind / ahead of the latest test.
 
@@ -46,6 +55,7 @@ library(sctransform)
 library(tidyverse)
 library(cowplot)
 library(DoubletFinder)
+library(MAST)
 ```
 
 ```{r setup}
@@ -53,23 +63,93 @@ library(DoubletFinder)
 library(tamlabscpipeline)
 ```
 
-
-Let us assume also that you have access to an output of cellranger in the form of a dir or an H5 file. 
-
-The seuratpipeline() function will perform QC and initial clustering of your dataset. This will involve filtering out high mitochondrial content cells, low library size cells, and doublets; then normalizing using [SingleCellTransform (SCT)](https://genomebiology.biomedcentral.com/articles/10.1186/s13059-019-1874-1) and clustering using the Louvain method as implemented in [Seurat](https://satijalab.org/seurat/).
-
-Here is a quick start for launching the analysis pipeline using this function. I have used the object filepath to store a string containing the path to an example file.
-
-The command prints out a bunch of plots for QC purposes, so best to wrap it in a pdf command block.
-
-### quick start
+### Quickstart
+The following commands will perform QC filtering, clustering, differential gene expression testing and exploratory gene set enrichment analysis on the H5 output file from the Cellranger pipeline.
 
 ```
-pdf('testrun.pdf')
+pdf('qcplots.pdf')
 
 sobj <- seuratpipeline(data = filepath, #path to dataset
-               format = h5 #format; dir or H5
+               format = h5 #format; typically cellranger dir or H5
                
+               )
+
+dev.off()
+
+degdir = 'clusterDEG_2020-01-08_MAST'
+
+deg.acrossclusters(sobj, outdir)
+
+gseapipeline.clusters(inputfolder = degdir)
+
+```
+
+Altogether, these functions will return:
+
+* an analyzed Seurat object named "sobj"; 
+* a bunch of plots, including QC plots and a UMAP plot for clustering contained within the "qcplots.pdf" file; 
+* a directory with differentially expressed genes for each cluster; 
+* and a heatmap printed to the standard out showing GSEA results for the clusters against the Broad's Hallmark Pathways. Default Hallmark GSEA (and cell-type scoring) utilize mouse gene symbols, although human symbols can be used without any problems for GSEA with human data input (and human cell-type scoring will be implemented soon).
+
+
+See below for further details and ideas for QC, data exploration and analysis.
+
+
+## QC and analysis
+
+Let's assume you have a dataset at the ready. I will try to provide a small example dataset for reproducible tutorials in the future. Currently this dataset should be the output of [Cellranger](https://support.10xgenomics.com/single-cell-gene-expression/software/pipelines/latest/what-is-cell-ranger) in the form of a directory or an H5 file.
+
+The `seuratpipeline()` function will perform QC and initial clustering of your dataset. This will involve filtering out high mitochondrial content cells, low library size cells, and doublets; then normalizing using [SingleCellTransform (SCT)](https://genomebiology.biomedcentral.com/articles/10.1186/s13059-019-1874-1) and clustering using the Louvain method as implemented in [Seurat](https://satijalab.org/seurat/).
+
+Here is somee explanation about the function and its options. The object `filepath` stores a string containing the path to an example file.
+
+```
+pdf('qcplots.pdf')
+
+sobj <- seuratpipeline(
+               #required arguments: data file path and format of data.
+               data = filepath,
+               format = h5,#h5 not default, but typical.
+               
+               #only used for kallisto | bustools pipeline
+               transcript_gene_file = NULL, 
+               
+               project = NULL, #name of seurat object, sobj@project.name
+               
+               #"baseline", global filtration. 
+               baselinefilter.mad = F,
+                baseline.mito.filter = T,
+                madmax.dist.percentmito.baseline = 'predict',
+                baseline.libsize.filter = T,
+                madmax.dist.nCount_RNA.baseline = 'predict,
+                
+              #auto id and remove hi-mito content clusters.
+              removemitomaxclust = T,
+              
+              #iterative filtering options for first-pass clusters.
+              iterativefilter = T,
+                iterativefilter.libsize = 'lefttail',
+                iterativefilter.mito = F,
+                
+              #perform cell cycle correction via regression. Default F. 
+              #Still calculates cell cycle scores if set to False.  
+              cellcycleregression = F,
+              
+              #manually choose which genes used in PCA.
+              #default if NULL is variable genes called by SCT.
+              PCAgenelist=NULL,
+              
+              #Jackstraw analysis to test for significant PCs. Default = F
+              jackstraw = F,
+              
+              #which PCs to use in clustering and dim-reduction for viz.
+              #default = 1:30
+              dims = 1:30,
+              
+              #"Resolution parameter" used for Louvain Clustering.
+              #default is three values, final value set as active identity:
+              res = c(0.5, 1.5, 1.0)
+
                )
 
 dev.off()
@@ -77,6 +157,8 @@ dev.off()
 ```
 
 This function is designed to give a rough but pretty good minimum initial clustering across different datasets. On a dataset of ~17,000 genes x ~5,500 using a 2018 MacBook Pro this took roughly 20 minutes. In that time, you can read the rest of this vignette for more details about this function and how to further assess the quality of your dataset; think about some hypotheses you'd like to explore in your data;  and ponder the precarious global geopolitical situation we find ourselves living in.
+
+
 
 ***
 
@@ -90,11 +172,26 @@ By default, this function will perform QC and clustering of the data. Default QC
   + Filtering will not take place if the cluster size is below a minimum arbitrary threshold (100 cells), as Med.Abs.Dev. learning performs quite poorly with smaller cell numbers.
   + this step will generate two visualizations for each cluster: one showing the Med.Abs.Dev. threshold learnt for that cluster, the second showing the actual cutoff point denoted by this threshold. Plots will be generated even for clusters of under 100 cells, but these clusters will not actually be subjected to lib size filtration.
 4. Third-pass clustering. This will involve the identification and removal of doublets. Doublet identification relies on [DoubletFinder](https://www.sciencedirect.com/science/article/abs/pii/S2405471219300730)
-  + this will generate a line-graph containing very little information that you can and should ignore. This step also performs its own multi-pass clustering steps using default parameters.
+  + this will generate a line-graph that you can ignore. This step also performs its own multi-pass clustering steps using default parameters.
 5. Cell cycle scores will be calculated. By default, there will be no automatic cell cycle correction, as this can vary from dataset to dataset and should be assessed manually.
 6. A finalized normalization and clustering step using SCT and Seurat Louvain clustering will take place.
 7. The function will return a Seurat object containing fully normalized and scaled matrices; clustering assignments; and dimensionality reduction embeddings, including PCA, tSNE and UMAP.
 
+***
+
+More details about options:
+
+* "Baseline" options (baselinefilter.mad). Filtering applied before any clustering. Cutoffs based on median absolute deviation (MAD); maximum deviation thresholds (madmax) can be predicted from data or set manually. If baselinefilter.mad is set to false, other "baseline" parameters have no effect. Susceptible to cell-type biases; defaults to FALSE.
+* Remove High Mito clusters (removemitomaxclust). Automatically identify and remove high mitochondrial content  cluster(s) after first-pass clustering. Based on recursive Grubb's outlier test. Good to use if mito baseline filtering is not used. Default is True.
+* Iterative filtering (iterativefilter). Filters applied to each cluster after first-pass clustering. Thresholds for filtering set by learning median absolute deviation thresholds for each cluster. Filters will not be applied if cluster is below a certain cell number size (arbitrarily set at 100 cells). Default is only to set a lower (left-tail) MAD threshold for each cluster.
+  + Left-tail lib size filtering captures cell debris while avoiding cell type biases inherent in global "baseline" filtering by setting a minimum library size based on automatically predicted median absolute deviation thesholds.
+  + 'twosided' lib size filtering attempts to capture both cell debris and doublets, specifically "homotypic" doublets, by setting both minimum and maximum thresholds. However, doublet capture may not really be effective using this strategy, as high library size may be more of an artifact of overamplification or oversequencing, rather than the starting cell material.
+  + mitochondrial iterative filtering (iterativefilter.mito) is meant to remove high mitochondrial content cells from each cluster based on MAD cutoffs learnt from the data.
+* cellcycleregression - Whether to correct for cell cycle effects. Default False, but still calcualtes cell cycle scores for manual inspection.
+* PCAgenelist - Manually set gene list. Takes a character vector of gene names. Default = NULL --> will use variable genes called by SingleCellTransform (SCT).
+* jackstraw - T/F - whether to use Jackstraw to assess significance of each PC. Default = F. Takes a long time and results not readily interpretable with SCT.
+* dims: which PCs to use in clustering and calcualtion of tSNE / UMAP. Defaults to 1:30. When using SCT, noise reduction is adequate for using more dimensions even on smaller size datasets (few thousand cells). For exceptionally large datasets >(10s of thousands of cells) more PCs can be useful.
+* res: set resolution paramter to use in Louvain clustering. Resolution can help offset a known bias in default Louvain clustering by which larger datasets can coerce small (true) communities into larger clusters, thus missing true undrlying heterogeneity. Higher res = more clusters; too high res will cluster on noise rather than signal, too low res may miss true communities that deserve their own cluster. Default calculates clustering for thre values, c(0.5, 1.5, 1.0), setting the resulting Seurat object's active identity to the clusters identified by res=1.0; this corresponds to totally default Louvain clustering. Refer to [Newman 2016](https://arxiv.org/abs/1606.02319) for more details.
 
 
 #### Here are some suggestions for assessing dataset quality.
@@ -133,30 +230,76 @@ An integrated assessment of quality and the decision to recluster using differen
 
 ***
 
-## Downstream analysis
+## Differentially Expressed Genes
 
 After clustering, it is often useful to run differential expression testing to identify differentiall expressed genes (DEGs). This can be used as input for Gene Set Enrichment Analysis (GSEA).
 
 For differential expression testing, Seurat provides wrappers for tests such as the [MAST](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4676162/) test, specifically developed to identify DEGs while attempting to correct for the biases and noise inherent to scRNAseq data.
 
-The following can be used to test for DEGs in all clusters:
+If you would like to use the GSEA pipeline included with tamlabscpipeline, it would be beneficial to use the function `deg.acrossclusters()`. This function is a wrapper around Seurat's wrapper, which can be used as follows:
 
 ```
-library(MAST)
+deg.acrossclusters(sobj, 
+                   idents,
+                   test,
+                   latent.vars,
+                   outdir
+                  )
 
-sobj.markers <- FindAllMarkers(sobj, 
-                               test.use = 'MAST',
-                               latent.vars = c('nCount_RNA', 'percent.mito')
 ```
 
-Exploration of these can occur manually via manipulation of the resulting data.frame structure.
-
-
-GSEA functions are provided by the `tamlabscpipeline` suite. Documentation and vignettes will be provided very soon.
+This function will save output files to `outdir`. Output is a directory containing .rds files which store dataframes containing the output of Seurat::FindMarkers(). This function takes a while. To help deal with the risk of interruptions, this function is written in a way that tries to pick up where previously left off if stopped part-way through; simply recall the original invocation and it will try to pickup where left off.
 
 ***
 
-There are some major improvements over the previous versions, including much better cell QC (more accrurately removing low-quality cells while being nicer to okay-quality cells). Also, there have been important changes made to clean up the code, remove unnecesarry options, optimize speed, and retain full scaled.data matrices at the final output.
+Options:
+
+* sobj: the seurat object, for example outputted by `tamlabscpipeline::seuratpipeline()`
+* idents: a categorical variable contained within the Seurat object metadata. Typically, the clustering assignment contained withing `sobj$seurat_clusters`. Meta.data acessed via `sobj@meta.data`, which returns a large dataframe containing information for every cell in the dataset; best to use `head(sobj@meta.data)` to view. Default is `seurat_clusters`, which if used directly from `seuratpipelne()` will correspond to clusters calculated at resolution = 1.0.
+* test: which test to perform; see `?Seurat::FindMarkers` for details and options. Default is MAST.
+* latent.vars: variables which will be regressed out in order to minimize their signal in DEG testing. Typically, noise. Called via a string or character vector referring to the name of columns in `sobj@meta.data`. Some tests, such as MAST, can only perform noise regression on quantitative rather than categorical variables.
+* outdir; the directory to save output files to. Defaults to "ClusterDEG_(Seurat object project name)_(date)_(test)". 
+
+***
+
+## GSEA for each cluster
+
+A gene set enrichment analysis (GSEA) pipeline is provided for individual datasets in the form of the `gseapipeline.clusters()` function.
+
+```
+gseapipeline.clusters(inputfolder,
+                      pathways = hallmark,
+                      nperm = 10000,
+                      makepdf = F,
+                      pdfname = NULL,
+                      filter_nonsig_pathways = F
+                      )
+
+```
+
+This function takes the result of the `deg.acrossclusters()` function as input. Simply set inputfolder equal to the a filepath string pointing to the directory created by that function.
+
+As output, `gseapipeline.clusters()` will return a heatmap, colored by normalized enrichment and denoting significance cutoffs.
+
+Significance cutoffs of >0.05 and >0.25 are used due to the underlying FGSEA algorithm allowing for standard alpha cutoffs, and for historical reasons inspired by the original GSEA algorithm respectively. Please see [Korotkevich, Sukhov, and Sergushichev 2019](https://www.biorxiv.org/content/10.1101/060012v2) for details on underlying algorithm.
+
+***
+
+Options / details:
+
+* inputfolder: string pointing to location of `deg.acrossclusters()` output directory. This contains .rds files storing dataframes outputted by Seurat::FindMarkers().
+* pathways: A named "list of lists" of genes. The format of this object is important for functionality of this function and can be previewed in the tamlabscpipeline::hallmark object. The names of each list element provides the Y axis; the genes within each list element are the target genes used for GSEA. If NULL, defaults to the Msigdb's Hallmark pathways for mouse. 
+  + The `msigdbr` package is extremely useful for finding mouse orthologs of the Broad's [Msigdb](http://software.broadinstitute.org/gsea/msigdb/index.jsp) repository of gene signatures. Please see the associated [vignette](https://cran.r-project.org/web/packages/msigdbr/vignettes/msigdbr-intro.html). Typical workflow for mouse datasets is to find an interesting gene set using the Broad's GUI and then use the mouse orthologs via msigdbr. The default Hallmark geneset, meant for exploratory analysis, was found in this way.
+* nperm: how many permutations FGSEA will use. Facilitates significance testing. Default is 10000.
+* makepdf: whether to print to pdf. Only for Mac users currently :/ this is because of limitations with special character encoding / printing to PDF. The marks for siginificance placed on the heatmap are specially encoded. Mac makes use of the quartz pdf device. Windows users are invited to explore wrapping the function in a CairoPDF call. This will hopefully be fixed soon.
+  + pdfname: name of pdf. Only for Mac / Quartz users
+* filter_nonsig_pathways: whether to show only rows that have at least one signifcant cell in the output heatmap. Default is False. Can be useful for polished plotting after exploratory data analysis.
+
+
+***
+#### Final notes
+
+There have been some major improvements over the previous versions, including much better cell QC (more accrurately removing low-quality cells while being nicer to okay-quality cells). Also, there have been important changes made to clean up the code, remove unnecesarry options, optimize speed, and retain full scaled.data matrices at the final output. Tammela lab users are therefore encouraged to use this version of all code rather than previously shared versions.
 
 
 ``` {r, echo=FALSE}

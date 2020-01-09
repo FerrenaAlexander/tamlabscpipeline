@@ -19,7 +19,7 @@ deg.acrossclusters(
 
 \item{test}{A string connoting which DEG test to perform. See ?Seurat::FindMarkers() for details on options. Defaults to "MAST".}
 
-\item{latent.vars}{A string or character vector referring to which columns to use a "latent variables", which some of the tests will attempt to regress out the effect of. Some tests (such as MAST) can only perform this for quantitative, continuous variables. Defaults to ('nFeature_RNA', 'nCount_RNA', 'percent.mito').}
+\item{latent.vars}{A string or character vector referring to which columns to use a "latent variables", which some of the tests will attempt to regress out the effect of. Some tests (such as MAST) can only perform this for quantitative variables (rather than categorical). Defaults to ('nFeature_RNA', 'nCount_RNA', 'percent.mito').}
 
 \item{outdir}{a string connoting which directory to save results in. Will create directory if it does not exist. Will not overwrite. Defaults to the following: "ClusterDEG_(Seurat object project name)_(date)_(test)"}
 }

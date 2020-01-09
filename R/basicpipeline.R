@@ -1280,7 +1280,7 @@ seuratpipeline <- function(data,
 
 
 
-# DEGs from each clusters, output compatible with GSEA fxn ---------------
+# DEGs from each cluster, output compatible with GSEA fxn ---------------
 #' Differential expression testing for clusters in a single sample
 #'
 #' A function to run differentially expressed gene (DEG) testing and save to disk the output in a format compatible with gseapipeline.clusters() function.
@@ -1288,7 +1288,7 @@ seuratpipeline <- function(data,
 #' @param sobj A seurat object, usually one on which Seurat::FindClusters() has been run.
 #' @param idents A string referring to a categorical column of the seurat metadata, such as the output of Seurat::FindClusters(). Defaults to 'seurat_project'.
 #' @param test A string connoting which DEG test to perform. See ?Seurat::FindMarkers() for details on options. Defaults to "MAST".
-#' @param latent.vars A string or character vector referring to which columns to use a "latent variables", which some of the tests will attempt to regress out the effect of. Some tests (such as MAST) can only perform this for quantitative, continuous variables. Defaults to ('nFeature_RNA', 'nCount_RNA', 'percent.mito').
+#' @param latent.vars A string or character vector referring to which columns to use a "latent variables", which some of the tests will attempt to regress out the effect of. Some tests (such as MAST) can only perform this for quantitative variables (rather than categorical). Defaults to ('nFeature_RNA', 'nCount_RNA', 'percent.mito').
 #' @param outdir a string connoting which directory to save results in. Will create directory if it does not exist. Will not overwrite. Defaults to the following: "ClusterDEG_(Seurat object project name)_(date)_(test)"
 #' @return Saves output files to outdir. Output is a directory containing .rds files which store dataframes containing the output of Seurat::FindMarkers(). Will not return anything else besides printing progress reports to the standard out.
 #' @examples
