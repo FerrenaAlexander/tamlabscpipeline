@@ -201,35 +201,47 @@ More details about options:
 * res: set resolution paramter to use in Louvain clustering. Resolution can help offset a known bias in default Louvain clustering by which larger datasets can coerce small (true) communities into larger clusters, thus missing true undrlying heterogeneity. Higher res = more clusters; too high res will cluster on noise rather than signal, too low res may miss true communities that deserve their own cluster. Default calculates clustering for thre values, c(0.5, 1.5, 1.0), setting the resulting Seurat object's active identity to the clusters identified by res=1.0; this corresponds to totally default Louvain clustering. Refer to [Newman 2016](https://arxiv.org/abs/1606.02319) for more details.
 
 
-#### Here are some suggestions for assessing dataset quality.
+#### Here are some suggestions for exploring the dataset and manually assessing quality.
 
 ``` {r, echo=FALSE}
-library(Seurat)
-library(sctransform)
-library(tidyverse)
-library(cowplot)
-library(DoubletFinder)
-knitr::opts_chunk$set(fig.width=7, fig.height=5) 
-sobj <- readRDS('../../tamlabtesting/sobj_default.rds')
+#library(Seurat)
+#library(sctransform)
+#library(tidyverse)
+#library(cowplot)
+#library(DoubletFinder)
+#knitr::opts_chunk$set(fig.width=7, fig.height=5) 
+#sobj <- readRDS('../../tamlabtesting/sobj_default.rds')
 ```
 
-``` {r}
+Inspect the clustering via the `Seurat::DimPlot()` command.
 
-FeaturePlot(sobj, c('nCount_RNA', 'percent.mito', 'S.Score', 'G2M.Score'))
 
-VlnPlot(sobj, c('nCount_RNA', 'nFeature_RNA', 'percent.mito'), ncol = 1)
+`DimPlot(sobj, label = T)`
 
-DimPlot(sobj, group.by = 'Phase')
 
-```
+![](embed/0.dimplot.clusts.png){height=500 width=600}
+
+`FeaturePlot(sobj, c('nCount_RNA', 'percent.mito', 'S.Score', 'G2M.Score'))`
+
+
+![](embed/1.fplot.png){height=500 width=600}
+
+`VlnPlot(sobj, c('nCount_RNA', 'nFeature_RNA', 'percent.mito'), ncol = 1)`
+
+
+![](embed/2.vlnplot.png){height=500 width=600}
+
+`DimPlot(sobj, group.by = 'Phase')`
+
+
+![](embed/3.dimplot.phases.png){height=500 width=600}
 
 A full assesment of quality will require cell type identification, for example via specific cell type markers. An example of this using Seurat's `FeaturePlot()` function is shown below:
 
-``` {r}
+`FeaturePlot(sobj, c('Ptprc', 'Cd3e', 'Cd19', 'Epcam'))`
 
-FeaturePlot(sobj, c('Ptprc', 'Cd3e', 'Cd19', 'Epcam'))
 
-```
+![](embed/4.fplot.celltype.png){height=500 width=600}
 
 Other cell type calling approaches make use of differentially expressed genes, the calling of which is discussed below. Automated (at at least semi-automated) cell-type calling is an active area of development and will be included in this suite soon.
 
@@ -288,7 +300,8 @@ gseapipeline.clusters(inputfolder,
 
 This function takes the result of the `deg.acrossclusters()` function as input. Simply set inputfolder equal to the a filepath string pointing to the directory created by that function.
 
-As output, `gseapipeline.clusters()` will return a heatmap, colored by normalized enrichment and denoting significance cutoffs.
+As output, `gseapipeline.clusters()` will return a heatmap, colored by normalized enrichment and denoting significance cutoffs. The heatmap will look something like this: 
+![](embed/5.heatmap.png){height=500 width=600}
 
 Significance cutoffs of >0.05 and >0.25 are used due to the underlying FGSEA algorithm allowing for standard alpha cutoffs, and for historical reasons inspired by the original GSEA algorithm respectively. Please see [Korotkevich, Sukhov, and Sergushichev 2019](https://www.biorxiv.org/content/10.1101/060012v2) for details on underlying algorithm.
 
@@ -322,5 +335,5 @@ Parallelization should increase the speed of all functions. Parallelization is i
 
 
 ``` {r, echo=FALSE}
-rm(sobj)
+#rm(sobj)
 ```
