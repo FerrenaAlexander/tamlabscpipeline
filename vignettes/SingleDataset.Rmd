@@ -79,7 +79,7 @@ dev.off()
 
 degdir = 'clusterDEG_2020-01-08_MAST'
 
-deg.acrossclusters(sobj, outdir)
+deg.acrossclusters(sobj, degdir)
 
 gseapipeline.clusters(inputfolder = degdir)
 
