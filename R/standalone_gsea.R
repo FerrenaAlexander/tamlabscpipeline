@@ -10,14 +10,13 @@
 #' @param weightmethod A string, one of either "pvalue", "padj", or "foldchange".
 #' @param onlypos T/F. Whether to filter each cluster to only include upregulated genes.
 #' @param filter_nonsig_pathways T/F. Whether to remove non-significant rows from resulting heatmap. Useful if running very large numbers of pathways, or to generate finalized plots after exploratory analysis. Default = F.
-#' @return Prints a heatmap to the standard out.
+#' @return Returns a ggplot object, prints a heatmap to the standard out.
 #' @examples
 #' \dontrun{
 #' sobjmarkers <- Seurat::FindAllMarkers(sobj)
 #' gsea.clusters(sobjmarkers)
 #' }
 gsea.clusters <- function(degdf,
-                          clustercolname=NULL,
                           pathways=NULL,
                           nperm=NULL,
                           weightmethod=NULL,
@@ -26,7 +25,8 @@ gsea.clusters <- function(degdf,
 
   set.seed(500)
 
-  if(is.null( clustercolname )) {clustercolname <- 'cluster'}
+  #if(is.null( clustercolname )) {clustercolname <- 'cluster'}
+  clustercolname <- 'cluster'
   if(is.null( pathways )) {pathways <- tamlabscpipeline::hallmark}
   if(is.null( nperm )) {nperm <- 10000}
   if(is.null( weightmethod )) {weightmethod <- 'pvalue'}
