@@ -273,10 +273,10 @@ gseapipeline.conditions <- function(inputfolder,
 
   if( makepdf == T) {quartz(type = 'pdf', file = pdfname, width = 8)}
 
+  #loop thru inputdir
   for(j in stringr::str_sort(list.files(inputfolder), numeric = T) ){
     indir <- paste0(inputfolder, '/', j, '/')
 
-    #indir <- "clusters_mast/"
     files <- list.files(indir)
 
     message('\nRunning FGSEA on ',j, ':')
