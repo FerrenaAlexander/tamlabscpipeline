@@ -1394,7 +1394,6 @@ gseapipeline.clusters <- function(inputfolder,
   if( makepdf == T) {quartz(type = 'pdf', file = pdfname, width = 8)}
 
 
-  #indir <- "clusters_mast/"
   files <- stringr::str_sort(list.files(inputfolder), numeric = T)
 
   res <- data.frame()
