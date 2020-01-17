@@ -10,7 +10,7 @@
 #' @param weightmethod A string, one of either "pvalue", "padj", or "foldchange".
 #' @param onlypos T/F. Whether to filter each cluster to only include upregulated genes.
 #' @param filter_nonsig_pathways T/F. Whether to remove non-significant rows from resulting heatmap. Useful if running very large numbers of pathways, or to generate finalized plots after exploratory analysis. Default = F.
-#' @return Returns a ggplot object, prints a heatmap to the standard out.
+#' @return Returns a ggplot object, and prints a heatmap to the standard out.
 #' @examples
 #' \dontrun{
 #' sobjmarkers <- Seurat::FindAllMarkers(sobj)
@@ -187,7 +187,7 @@ gsea.clusters <- function(degdf,
 # GSEA using DEG across conditions ---------------------------
 #' GSEA for conditions.
 #'
-#' Perform and plot GSEA heatmap for comparison across condtions. Expects input as list of dataframes. Each dataframe corresponds to a particular condtion. Multiple conditions (ie >= 2) can be run.
+#' Perform and plot GSEA heatmap for comparison across condtions. Expects input as list of dataframes. Each dataframe corresponds to a particular condtion; expected dataframe format matches output of Seurat::FindMarkers(). Multiple conditions (ie >= 2) can be run.
 #' Output plots can be difficult to read if many pathways are used. Recommended 50-75 or so pathways as the maximum, many more will generate very ugly heatmaps.
 #' Utilizes special characters, so pdf printing may be problematic. Alternative PDF devices should be able to handle this though, one can use Quartz if on Mac, or CairoPDF if on Windows.
 #' @param inputlist A list of dataframes. Must be named. Names will be used as x axis. Order of names retained in axis.
@@ -196,7 +196,12 @@ gsea.clusters <- function(degdf,
 #' @param weightmethod A string, one of either "pvalue", "padj", or "foldchange".
 #' @param onlypos T/F. Whether to filter each cluster to only include upregulated genes.
 #' @param filter_nonsig_pathways T/F. Whether to remove non-significant rows from resulting heatmap. Useful if running very large numbers of pathways, or to generate finalized plots after exploratory analysis. Default = F.
-#' @return Prints a heatmap to the standard out.
+#' @return Returns a ggplot object, and prints a heatmap to the standard out.
+#' @examples
+#' \dontrun{
+#' inputlist <- list(treatment = treatmentdf, control = controldf)
+#' gsea.clusters(sobjmarkers)
+#' }
 gsea.conditions <- function(inputlist,
                             pathways=NULL,
                             nperm=NULL,
