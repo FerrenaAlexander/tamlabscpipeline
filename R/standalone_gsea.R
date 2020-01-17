@@ -1,49 +1,50 @@
 # GSEA using DEGs from clusters ---------------------------
 #' GSEA for clusters.
 #'
-#' A function to perform GSEA on differentially expressed gene lists from clusters. Relies for input on the output format from deg.acrossclusters(), and gene pathways in the form of named lists. Also relies on the FGSEA package by Alexey Sergushichev.
-#' unfortunately, currently this function only works for Mac users due to PDF encoding limitations special symbols (ie, points denoting statistical signifcance on heatmaps), but windows portability will come very soon.
+#' A function to perform GSEA on differentially expressed gene lists from clusters. Expects column names consistent with output of Seurat::FindAllMarkers(). Essentially, a dataframe where each row corresponds to a gene, and columns consists of the following: "p_val", "avg_logFC", "pct.1", "pct.2", "p_val_adj", "cluster", and "gene". Minimally requires "cluster", "gene", and "avg_logFC". Pvalue and/or adjusted pvalue can be included if weighting by those values.
 #' Output plots can be difficult to read if many pathways are used. Recommended 50-75 or so pathways as the maximum, many more will generate very ugly heatmaps.
-#' @param inputfolder A string containing the path to a directory of .rds files storing dataframes outputted by Seurat::FindMarkers(). This is the format of the output of tamlabscpipeline::deg.acrossclusters().
+#' Utilizes special characters, so pdf printing may be problematic. Alternative PDF devices should be able to handle this though, one can use Quartz if on Mac, or CairoPDF if on Windows.
+#' @param degdf A dataframe in the format of the output of Seurat::FindAllMarkers.
 #' @param pathways A named "list of lists" of genes. The format of this object is important for functionality of this function and can be previewed in the tamlabscpipeline::hallmark object. The names of each list element provides the Y axis; the genes within each list element are the target genes used for GSEA. If NULL, defaults to the Msigdb's Hallmark pathways for mouse.
 #' @param nperm An integer denoting how many permutations FGSEA will run. Default = 10000.
-#' @param makepdf T/F. Whether to print to an output PDF or not. Default = F.
-#' @param pdfname A string denoting the name of putput pdf. No effect if makepdf == F. Default is 'clusterGSEA_(date).pdf'
+#' @param weightmethod A string, one of either "pvalue", "padj", or "foldchange".
+#' @param onlypos T/F. Whether to filter each cluster to only include upregulated genes.
 #' @param filter_nonsig_pathways T/F. Whether to remove non-significant rows from resulting heatmap. Useful if running very large numbers of pathways, or to generate finalized plots after exploratory analysis. Default = F.
 #' @return Prints a heatmap to the standard out, or to a pdf.
 #' @examples
 #' \dontrun{
-#' gseapipline.clusters(inputfolder = 'deg.acrossclusters.outputdir/')
+#' sobjmarkers <- Seurat::FindAllMarkers(sobj)
+#' gsea.clusters(sobjmarkers)
 #' }
-gsea.clusters <- function(inputfolder,
-                                  pathways=NULL,
-                                  nperm=NULL,
-                                  #weightmethod=NULL,
-                                  makepdf=NULL,
-                                  pdfname=NULL,
-                                  filter_nonsig_pathways=NULL){
+gsea.clusters <- function(degdf,
+                          clustercolname=NULL,
+                          pathways=NULL,
+                          nperm=NULL,
+                          weightmethod=NULL,
+                          onlypos=NULL,
+                          filter_nonsig_pathways=NULL){
 
   set.seed(500)
 
+  if(is.null( clustercolname )) {clustercolname <- 'cluster'}
   if(is.null( pathways )) {pathways <- tamlabscpipeline::hallmark}
   if(is.null( nperm )) {nperm <- 10000}
-  #if(is.null( weightmethod )) {weightmethod <- 'pvalue'}
-  weightmethod <- 'pvalue'
-  if(is.null( makepdf )) { makepdf <- F}
+  if(is.null( weightmethod )) {weightmethod <- 'pvalue'}
+  if(is.null( onlypos )) {onlypos <- F}
+
+  #weightmethod <- 'pvalue'
   if(is.null( filter_nonsig_pathways )) {filter_nonsig_pathways <- F}
-  if(is.null( pdfname )) { pdfname <- paste0('clusterGSEA_', Sys.Date(), '.pdf') }
-
-
-  if( makepdf == T) {quartz(type = 'pdf', file = pdfname, width = 8)}
-
-
-  #indir <- "clusters_mast/"
-  files <- stringr::str_sort(list.files(inputfolder), numeric = T)
 
   res <- data.frame()
-  for(i in files){
-    #message('Running ', i)
-    tmp <- readRDS( paste0(inputfolder, '/',  i) )
+  for(i in unique(degdf[,clustercolname]) ){
+
+    tmp <- degdf[degdf[,clustercolname] == i, ]
+
+
+    if(onlypos == T){
+      tmp[tmp$avg_logFC >0,]
+    }
+
 
     if(weightmethod == 'pvalue') {
       scores <- log(tmp$p_val)
@@ -60,22 +61,35 @@ gsea.clusters <- function(inputfolder,
       }
 
       scores <- (-1 * scores) * sign(tmp$avg_logFC)
-      names(scores) <- rownames(tmp)
+      names(scores) <- tmp$gene
       rm(tmp)
       scores <- sort(scores, decreasing = T)
     }
 
     if(weightmethod == 'padj') {
       scores <- log(tmp$p_val_adj)
+
+      #fix underflow
+      if( any(scores == -Inf) ){
+
+        numuf = length(scores[scores==-Inf])
+        adder = rev(1:numuf)
+        for(uf in rev(1:numuf)){
+          scores[uf] <- scores[numuf + 1] + (adder[uf] * -1)
+        }
+
+      }
+
       scores <- (-1 * scores) * sign(tmp$avg_logFC)
-      names(scores) <- rownames(tmp)
+      names(scores) <- tmp$gene
       rm(tmp)
       scores <- sort(scores, decreasing = T)
     }
 
     if(weightmethod == 'foldchange'){
       scores <- 10^tmp$avg_logFC
-      names(scores) <- rownames(tmp)
+
+      names(scores) <- tmp$gene
       rm(tmp)
       scores <- sort(scores, decreasing = T)
     }
@@ -86,23 +100,21 @@ gsea.clusters <- function(inputfolder,
       as_tibble() %>%
       arrange(desc(NES))
 
-    filename <- strsplit(x = basename(i), split = "\\.")[[1]][1]
-    cluster <- strsplit(x = filename, split = "\\_")[[1]][2]
 
     rm(fgseaRes)
 
 
-    fgseaResTidy$cluster <- rep(cluster, length(fgseaResTidy$pathway))
+    fgseaResTidy$cluster <- rep(paste0('cluster', i), length(fgseaResTidy$pathway))
 
     res <- rbind(res, fgseaResTidy)
     rm(fgseaResTidy)
     rm(scores)
-    message('\tCompleted ', cluster)
+    message('\tCompleted ', i)
 
   }
 
 
-
+  #fix NaN errors... origin unclear, may be related to low nperm?
   res$NES[is.na(res$NES)] <- 0
 
 
@@ -168,9 +180,6 @@ gsea.clusters <- function(inputfolder,
 
 
   print(gseaout)
-  #rm(res, res_tmp)
-
-  if( makepdf == T) {dev.off()}
 
 }
 
