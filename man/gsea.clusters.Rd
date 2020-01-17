@@ -6,7 +6,6 @@
 \usage{
 gsea.clusters(
   degdf,
-  clustercolname = NULL,
   pathways = NULL,
   nperm = NULL,
   weightmethod = NULL,
@@ -28,7 +27,7 @@ gsea.clusters(
 \item{filter_nonsig_pathways}{T/F. Whether to remove non-significant rows from resulting heatmap. Useful if running very large numbers of pathways, or to generate finalized plots after exploratory analysis. Default = F.}
 }
 \value{
-Prints a heatmap to the standard out.
+Returns a ggplot object, and prints a heatmap to the standard out.
 }
 \description{
 A function to perform GSEA on differentially expressed gene lists from clusters. Expects column names consistent with output of Seurat::FindAllMarkers(). Essentially, a dataframe where each row corresponds to a gene, and columns consists of the following: "p_val", "avg_logFC", "pct.1", "pct.2", "p_val_adj", "cluster", and "gene". Minimally requires "cluster", "gene", and "avg_logFC". Pvalue and/or adjusted pvalue can be included if weighting by those values.

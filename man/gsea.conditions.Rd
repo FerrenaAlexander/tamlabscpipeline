@@ -27,10 +27,16 @@ gsea.conditions(
 \item{filter_nonsig_pathways}{T/F. Whether to remove non-significant rows from resulting heatmap. Useful if running very large numbers of pathways, or to generate finalized plots after exploratory analysis. Default = F.}
 }
 \value{
-Prints a heatmap to the standard out.
+Returns a ggplot object, and prints a heatmap to the standard out.
 }
 \description{
-Perform and plot GSEA heatmap for comparison across condtions. Expects input as list of dataframes. Each dataframe corresponds to a particular condtion. Multiple conditions (ie >= 2) can be run.
+Perform and plot GSEA heatmap for comparison across condtions. Expects input as list of dataframes. Each dataframe corresponds to a particular condtion; expected dataframe format matches output of Seurat::FindMarkers(). Multiple conditions (ie >= 2) can be run.
 Output plots can be difficult to read if many pathways are used. Recommended 50-75 or so pathways as the maximum, many more will generate very ugly heatmaps.
 Utilizes special characters, so pdf printing may be problematic. Alternative PDF devices should be able to handle this though, one can use Quartz if on Mac, or CairoPDF if on Windows.
+}
+\examples{
+\dontrun{
+inputlist <- list(treatment = treatmentdf, control = controldf)
+gsea.clusters(sobjmarkers)
+}
 }
