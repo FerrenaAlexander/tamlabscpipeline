@@ -5,7 +5,9 @@
 #'
 #' Expects as input a data.frame with column names consistent with output of Seurat::FindAllMarkers(). Essentially, a dataframe where each row corresponds to a gene, and columns consists of the following: "p_val", "avg_logFC", "pct.1", "pct.2", "p_val_adj", "cluster", and "gene". Minimally requires "cluster", "gene", and "avg_logFC". Pvalue and/or adjusted pvalue can be included if weighting by those values.
 #'
-#' Pathways must be a named list of character vectors; by default uses mouse orthologs of Msigdb Hallmark sets. See FGSEA package docs for details. Also check out the Broad's Msigdb to view a large database of pathways and the MsigdbR package to get orthologs of the Msigdb pathways for your species of interest.
+#' Pathways must be a named list of character vectors; by default uses mouse orthologs of Msigdb Hallmark sets, accessible via tamlabscpipeline::hallmark.
+#'
+#' See FGSEA package docs for details. Also check out the Broad's Msigdb to view a large database of pathways and the MsigdbR package to get orthologs of the Msigdb pathways for your species of interest.
 #'
 #' Output plots can be difficult to read if many pathways are used. Recommended 50-75 or so pathways as the maximum, many more will generate very ugly heatmaps.
 #' Utilizes special characters, so pdf printing may be problematic. Alternative PDF devices should be able to handle this though, one can use Quartz if on Mac, or CairoPDF if on Windows.
@@ -192,9 +194,13 @@ gsea.clusters <- function(degdf,
 # GSEA using DEG across conditions ---------------------------
 #' GSEA for conditions.
 #'
-#' Perform and plot GSEA heatmap for comparison across condtions. Expects input as list of dataframes. Each dataframe corresponds to a particular condtion; expected dataframe format matches output of Seurat::FindMarkers(). Multiple conditions (ie >= 2) can be run.
+#' Perform and plot GSEA heatmap for comparison across condtions.
 #'
-#' Pathways must be a named list of character vectors; by default uses mouse orthologs of Msigdb Hallmark sets. See FGSEA package docs for details. Also check out the Broad's Msigdb to view a large database of pathways and the MsigdbR package to get orthologs of the Msigdb pathways for your species of interest.
+#' Expects input as list of dataframes. Each dataframe corresponds to a particular condtion; expected dataframe format matches output of Seurat::FindMarkers(). Multiple conditions (ie >= 2) can be run.
+#'
+#' Pathways must be a named list of character vectors; by default uses mouse orthologs of Msigdb Hallmark sets, accessible via tamlabscpipeline::hallmark.
+#'
+#' See FGSEA package docs for details. Also check out the Broad's Msigdb to view a large database of pathways and the MsigdbR package to get orthologs of the Msigdb pathways for your species of interest.
 #'
 #' Output plots can be difficult to read if many pathways are used. Recommended 50-75 or so pathways as the maximum, many more will generate very ugly heatmaps.
 #' Utilizes special characters, so pdf printing may be problematic. Alternative PDF devices should be able to handle this though, one can use Quartz if on Mac, or CairoPDF if on Windows.

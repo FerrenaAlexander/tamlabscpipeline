@@ -30,10 +30,14 @@ gsea.conditions(
 Returns a ggplot object, and prints a heatmap to the standard out.
 }
 \description{
-Perform and plot GSEA heatmap for comparison across condtions. Expects input as list of dataframes. Each dataframe corresponds to a particular condtion; expected dataframe format matches output of Seurat::FindMarkers(). Multiple conditions (ie >= 2) can be run.
+Perform and plot GSEA heatmap for comparison across condtions.
 }
 \details{
-Pathways must be a named list of character vectors; by default uses mouse orthologs of Msigdb Hallmark sets. See FGSEA package docs for details. Also check out the Broad's Msigdb to view a large database of pathways and the MsigdbR package to get orthologs of the Msigdb pathways for your species of interest.
+Expects input as list of dataframes. Each dataframe corresponds to a particular condtion; expected dataframe format matches output of Seurat::FindMarkers(). Multiple conditions (ie >= 2) can be run.
+
+Pathways must be a named list of character vectors; by default uses mouse orthologs of Msigdb Hallmark sets, accessible via tamlabscpipeline::hallmark.
+
+See FGSEA package docs for details. Also check out the Broad's Msigdb to view a large database of pathways and the MsigdbR package to get orthologs of the Msigdb pathways for your species of interest.
 
 Output plots can be difficult to read if many pathways are used. Recommended 50-75 or so pathways as the maximum, many more will generate very ugly heatmaps.
 Utilizes special characters, so pdf printing may be problematic. Alternative PDF devices should be able to handle this though, one can use Quartz if on Mac, or CairoPDF if on Windows.
