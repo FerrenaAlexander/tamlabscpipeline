@@ -14,8 +14,8 @@
 #' @param degdf A dataframe in the format of the output of Seurat::FindAllMarkers.
 #' @param pathways A named "list of lists" of genes. The format of this object is important for functionality of this function and can be previewed in the tamlabscpipeline::hallmark object. The names of each list element provides the Y axis; the genes within each list element are the target genes used for GSEA. If NULL, defaults to the Msigdb's Hallmark pathways for mouse.
 #' @param nperm An integer denoting how many permutations FGSEA will run. Default = 10000.
-#' @param weightmethod A string, one of either "pvalue", "padj", or "foldchange".
-#' @param onlypos T/F. Whether to filter each cluster to only include upregulated genes.
+#' @param weightmethod A string, one of either "pvalue", "padj", or "foldchange". Default = "pvalue".
+#' @param onlypos T/F. Whether to filter each cluster to only include upregulated genes. Default = F.
 #' @param filter_nonsig_pathways T/F. Whether to remove non-significant rows from resulting heatmap. Useful if running very large numbers of pathways, or to generate finalized plots after exploratory analysis. Default = F.
 #' @return Returns a ggplot object, and prints a heatmap to the standard out.
 #' @examples
@@ -207,8 +207,8 @@ gsea.clusters <- function(degdf,
 #' @param inputlist A list of dataframes. Must be named. Names will be used as x axis. Order of names retained in axis.
 #' @param pathways A named "list of lists" of genes. The format of this object is important for functionality of this function and can be previewed in the tamlabscpipeline::hallmark object. The names of each list element provides the Y axis; the genes within each list element are the target genes used for GSEA. If NULL, defaults to the Msigdb's Hallmark pathways for mouse.
 #' @param nperm An integer denoting how many permutations FGSEA will run. Default = 10000.
-#' @param weightmethod A string, one of either "pvalue", "padj", or "foldchange".
-#' @param onlypos T/F. Whether to filter each cluster to only include upregulated genes.
+#' @param weightmethod A string, one of either "pvalue", "padj", or "foldchange". Default = "pvalue".
+#' @param onlypos T/F. Whether to filter each cluster to only include upregulated genes. Default = F.
 #' @param filter_nonsig_pathways T/F. Whether to remove non-significant rows from resulting heatmap. Useful if running very large numbers of pathways, or to generate finalized plots after exploratory analysis. Default = F.
 #' @return Returns a ggplot object, and prints a heatmap to the standard out.
 #' @examples

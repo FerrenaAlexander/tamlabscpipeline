@@ -20,9 +20,9 @@ gsea.conditions(
 
 \item{nperm}{An integer denoting how many permutations FGSEA will run. Default = 10000.}
 
-\item{weightmethod}{A string, one of either "pvalue", "padj", or "foldchange".}
+\item{weightmethod}{A string, one of either "pvalue", "padj", or "foldchange". Default = "pvalue".}
 
-\item{onlypos}{T/F. Whether to filter each cluster to only include upregulated genes.}
+\item{onlypos}{T/F. Whether to filter each cluster to only include upregulated genes. Default = F.}
 
 \item{filter_nonsig_pathways}{T/F. Whether to remove non-significant rows from resulting heatmap. Useful if running very large numbers of pathways, or to generate finalized plots after exploratory analysis. Default = F.}
 }
