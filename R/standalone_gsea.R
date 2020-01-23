@@ -377,7 +377,7 @@ gsea.conditions <- function(inputlist,
   }
 
 
-  print(gseaout)
+  return(gseaout)
   #rm(res, res_tmp)
 
 
