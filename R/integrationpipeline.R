@@ -327,7 +327,7 @@ gseapipeline.conditions <- function(inputfolder,
         arrange(desc(NES))
 
       filename <- strsplit(x = basename(i), split = "\\.")[[1]][1]
-      cluster <- strsplit(x = filename, split = "\\_")[[1]][2]
+      cluster <- strsplit(x = filename, split = "markers_")[[1]][2]
 
       rm(fgseaRes)
 
