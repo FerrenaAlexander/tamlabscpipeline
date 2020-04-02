@@ -344,7 +344,10 @@ gseapipeline.conditions <- function(inputfolder,
     if(!is.null( clusterlabs )) {
       res$cluster <- rep(clusterlabs, each = length(pathways))}
 
+    #fix broken tibble issue...
+    res <- as.data.frame(res)
 
+    #prevent NA...
     res$NES[is.na(res$NES)] <- 0
 
 
