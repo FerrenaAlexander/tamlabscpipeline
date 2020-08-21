@@ -30,8 +30,14 @@ install.packages("devtools") #if devtools not already installed
 devtools::install_github('apf2139/tamlabscpipeline', build_vignettes = T)
 ```
 
-Use `browseVignettes("tamlabscpipeline")` and select the HTML option for a quickstart guide, discussion of functions and analysis tips.
+Use `browseVignettes("tamlabscpipeline")` and select the HTML option for a discussion of functions and analysis tips.
 
+
+Quickstart:
+
+```
+seurat_obj <- tamlabscpipeline::seuratpipeline(data = "path_to_cellranger_output.h5", format = "h5")
+```
 
 Currently, single-sample pipeline is up and running. Functions are mostly set for integration (multi-sample comparison) pipeline, but documentation / vignettes are not ready yet. Upcoming updates in terms of code include HTO Demux; smarter doublet calling if Hashing was used; parallelization; better Windows compatibility (almost everything currently works); and better compatibility for human data (almost everything already currently works). (AF, 2020.01.08)
 
