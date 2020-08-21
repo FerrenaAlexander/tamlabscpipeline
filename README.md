@@ -1,6 +1,26 @@
 # tamlabscpipeline
 A basic package for scRNAseq data analysis.
 
+This pipeline was designed to automatically perform various QC steps such as mitochondrial content cutoffs and doublet detection.
+
+The following describes the default pipeline for individual sample QC and processing, as implemented in the seuratpipeline() function:
+The path to Cellranger output in the H5 or directory formats is specified. Kallisto output is also supported but has some extra requirements (see documentation).
+Mito cutoff and library size outlier cutoffs are applied after an initial round of clustering. First, "mito clusters" (driven entirely by mito content) are identified using the Grubb's test for outliers and removed, as implemented in the "outliers" package. 
+Next, the data is reclustered. In each remaining cluster, the distribution of mitochondrial content is assessed. Cutoffs for high mitochondrial content are made based on median absolute deviation. The upper threshold for median absolute deviation for each cluster is decided based on "changepoint analysis" (via the package ecm), based on the fact that most cells have low mito content, but often a few cells in each cluster have high amounts of mito content.
+A similar analysis is performed for library size, but this analysis is performed in a two-tail manner and does not include grubbs test or whole cluster removal.
+For both, if each cluster is under 100 cells, the QC metrics are calculated, but cells are not removed.
+Next, the data is reclustered after exlcuding the cells called as outliers in these ways. Then, doublet detection (via DoubletFinder) is applied.
+After this, a final clustering is undertaken, and a "clean and processed" Seurat object is returned.
+
+Other functions included in this package include convenience functions for other common scRNAseq analysis methods including:
+
+- GSEA implemented as a wrapper around the FGSEA package. Also includes Mouse orthologs for the MSIGDB Hallmarks set, as provided by the msigdbr package.
+- integration, wrapper around Seurat
+- differential expression wrapper around Seurat::FindMarkers() function
+- HTO demultiplexing, a wrapper around Seurat's HTODemux() package that also includes a function for parameter sweep of the "positive.quantile" parameter for optimal classification
+
+
+
 
 Installation instructions:
 ```
