@@ -3,16 +3,18 @@ A basic package for scRNAseq data analysis.
 
 This pipeline was designed to automatically perform various QC steps such as mitochondrial content cutoffs and doublet detection.
 
-A big motivation for this package was to develop a QC approach that both accurately removes low quality cells in the context of very high levels of heterogeneity and cell-type specific differences in mito-content and even library size. Thus, the main philosophy of the QC approach here is to first cluster, then perform analyze quality on each cluster, with the aim of more accurately applying QC thresholds than simpel global cutoffs.
+A big motivation for this package was to develop a QC approach that both accurately removes low quality cells in the context of very high levels of heterogeneity and cell-type specific differences in mito-content and even library size. Thus, the main philosophy of the QC approach here is to first cluster, then perform analyze quality on each cluster, with the aim of more accurately applying QC thresholds than simple global cutoffs.
 
 The following describes the default pipeline for individual sample QC and processing, as implemented in the `seuratpipeline()` function:
 The path to Cellranger output in the H5 or directory formats is specified. Kallisto output is also supported but has some extra requirements (see documentation).
-Mito cutoff and library size outlier cutoffs are applied after an initial round of clustering. First, "mito clusters" (driven entirely by mito content) are identified using the Grubb's test for outliers and removed, as implemented in the "outliers" package. 
-Next, the data is reclustered. In each remaining cluster, the distribution of mitochondrial content is assessed. Cutoffs for high mitochondrial content are made based on median absolute deviation. The upper threshold for median absolute deviation for each cluster is decided based on "changepoint analysis" (via the package ecm), based on the fact that most cells have low mito content, but often a few cells in each cluster have high amounts of mito content.
-A similar analysis is performed for library size, but this analysis is performed in a two-tail manner and does not include grubbs test or whole cluster removal.
-For both, if each cluster is under 100 cells, the QC metrics are calculated, but cells are not removed.
+
+
+* Mito cutoff and library size outlier cutoffs are applied after an initial round of clustering. First, "mito clusters" (driven entirely by mito content) are identified using the Grubb's test for outliers and removed, as implemented in the "outliers" package. 
+* Next, the data is reclustered. In each remaining cluster, the distribution of mitochondrial content is assessed. Cutoffs for high mitochondrial content are made based on median absolute deviation. The upper threshold for median absolute deviation for each cluster is decided based on "changepoint analysis" (via the package ecm), based on the fact that most cells have low mito content, but often a few cells in each cluster have high amounts of mito content.
+* A similar analysis is performed for library size, but this analysis is performed in a two-tail manner and does not include grubbs test or whole cluster removal.
+* For both mito and lib-size, if each cluster is under 100 cells, the QC metrics are calculated, but cells are not removed.
 Next, the data is reclustered after exlcuding the cells called as outliers in these ways. Then, doublet detection (via DoubletFinder) is applied.
-After this, a final clustering is undertaken, and a "clean and processed" Seurat object is returned.
+* After this, a final clustering is undertaken, and a "clean and processed" Seurat object is returned.
 
 Other functions included in this package include convenience functions for other common scRNAseq analysis methods including:
 
