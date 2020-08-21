@@ -3,6 +3,8 @@ A basic package for scRNAseq data analysis.
 
 This pipeline was designed to automatically perform various QC steps such as mitochondrial content cutoffs and doublet detection.
 
+A big motivation for this package was to develop a QC approach that both accurately removes low quality cells in the context of very high levels of heterogeneity and cell-type specific differences in mito-content and even library size. Thus, the main philosophy of the QC approach here is to first cluster, then perform analyze quality on each cluster, with the aim of more accurately applying QC thresholds than simpel global cutoffs.
+
 The following describes the default pipeline for individual sample QC and processing, as implemented in the seuratpipeline() function:
 The path to Cellranger output in the H5 or directory formats is specified. Kallisto output is also supported but has some extra requirements (see documentation).
 Mito cutoff and library size outlier cutoffs are applied after an initial round of clustering. First, "mito clusters" (driven entirely by mito content) are identified using the Grubb's test for outliers and removed, as implemented in the "outliers" package. 
