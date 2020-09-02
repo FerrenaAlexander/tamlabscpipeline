@@ -1,6 +1,9 @@
 # tamlabscpipeline
 A basic package for scRNAseq data analysis.
 
+Update (September 2 2020) - this package will soon be updated to support new versions of R and dependency packages. This is in the works and will hopefully be done in the coming weeks.
+
+
 This pipeline was designed to automatically perform various QC steps such as mitochondrial content cutoffs and doublet detection.
 
 A big motivation for this package was to develop a QC approach that both accurately removes low quality cells in the context of very high levels of heterogeneity and cell-type specific differences in mito-content and even library size. Thus, the main philosophy of the QC approach here is to first cluster, then perform analyze quality on each cluster, with the aim of more accurately applying QC thresholds than simple global cutoffs.
