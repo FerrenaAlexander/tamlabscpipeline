@@ -54,8 +54,6 @@ seuratpipeline <- function(data,
                            res=NULL){
 
 
-  set.seed(500)
-
   if(is.null( project )) {project <- "SeuratProject"}
 
   # baseline (global) filtration
@@ -66,7 +64,7 @@ seuratpipeline <- function(data,
   if(is.null( baseline.libsize.filter )) {baseline.libsize.filter <- T}
   if(is.null( madmax.dist.nCount_RNA.baseline )) {madmax.dist.nCount_RNA.baseline <- 'predict'}
 
-  # baseline (global) filtration
+  # cluster based filtration
   if(is.null( iterativefilter )) {iterativefilter <- T}
   if(is.null( removemitomaxclust )) {removemitomaxclust <- T}
   if(is.null( iterativefilter.libsize )) {iterativefilter.libsize <- 'lefttail'}
@@ -132,13 +130,54 @@ seuratpipeline <- function(data,
           '\tnum cells = ', ncol(tmp)  , '\n')
 
 
-  #mito content, add to metadata
-  mito.features <- grep(pattern = "^mt-", x = rownames(x = tmp), value = TRUE)
-  percent.mito <- Matrix::colSums(
-    x = GetAssayData(object = tmp, slot = 'counts')[mito.features, ]) / Matrix::colSums(x = GetAssayData(object = tmp, slot = 'counts')
+  tmp@commands$tamlabscpipeline <- list()
+
+  tmp@commands$tamlabscpipeline[['allcommands']] <-
+    data.frame(Command = c('baselinefilter.mad',
+                           'baseline.mito.filter', 'baseline.libsize.filter',
+
+                           'removemitomaxclust',
+
+                           'iterativefilter',
+                           'iterativefilter.libsize', 'iterativefilter.mito',
+
+                           'cellcycleregression'
+
+    ),
+
+
+
+    Option = c(baselinefilter.mad,
+               baseline.mito.filter, baseline.libsize.filter,
+
+               removemitomaxclust,
+
+               iterativefilter,
+               iterativefilter.libsize, iterativefilter.mito,
+
+               cellcycleregression
+
     )
-  tmp[['percent.mito']] <- percent.mito
-  rm(mito.features, percent.mito)
+    )
+
+
+
+  #mito and ribo content, add to metadata
+  #mito
+  mito.features <- grep(pattern = "^mt-", x = rownames(x = tmp), value = TRUE)
+
+  tmp[["percent.mito"]] <- PercentageFeatureSet(tmp, features = mito.features)
+
+  #ribo
+  ribogenes <- readxl::read_excel('~/Documents/tam/scripts/ribogenes.xlsx')
+  goodribo <- ribogenes$genesymbol[ribogenes$genesymbol %in% rownames(tmp)]
+
+  tmp[["percent.ribo"]] <- PercentageFeatureSet(tmp, features = goodribo)
+
+
+  #checkpoint_prebaseline <- tmp
+
+
 
   #whether to perform baseline filtering at all.
   if(baselinefilter.mad == T) {
@@ -228,47 +267,43 @@ seuratpipeline <- function(data,
       )
 
 
-      print(
-        ggplot(tmp@meta.data, aes(x = 0, y = percent.mito))+
-          geom_violin(fill='steelblue')+
-          geom_jitter(height = 0, width = 0.25, size = 0.1)+
-          geom_hline(yintercept = mitohi, col = 'red', linetype = 'dashed')+
-          theme_linedraw()+
-          theme(axis.text.x=element_blank(),
-                axis.ticks.x=element_blank())+
-          labs(title = paste0("percent mito cutoff"),
-               subtitle = paste0(length(rownames(tmp@meta.data)), " cells total",
-                                 "; cutoff for percent mito is ", as.character(round(mitohi, digits = 3))),
-               caption = paste0('Mito max MAD = ', round(madmax.dist.percentmito.baseline, 3) ,
-                                '\npercent.mito cutoff = ', round(mitohi, digits = 3),
-                                '\nNum cells presubset = ', ncol(tmp),
-                                '\nNum cells remaining = ', length(tmp$percent.mito[tmp@meta.data$percent.mito < mitohi]), '\n'))+
-          xlab('Cells')
-      )
 
+      gm <-   ggplot(tmp@meta.data, aes(x = 0, y = percent.mito))+
+        geom_violin(fill='steelblue')+
+        geom_jitter(height = 0, width = 0.25, size = 0.1)+
+        geom_hline(yintercept = mitohi, col = 'red', linetype = 'dashed')+
+        theme_linedraw()+
+        theme(axis.text.x=element_blank(),
+              axis.ticks.x=element_blank())+
+        labs(title = paste0("percent mito cutoff"),
+             subtitle = paste0(length(rownames(tmp@meta.data)), " cells total",
+                               "; cutoff for percent mito is ", as.character(round(mitohi, digits = 3))),
+             caption = paste0('Mito max MAD = ', round(madmax.dist.percentmito.baseline, 3) ,
+                              '\npercent.mito cutoff = ', round(mitohi, digits = 3),
+                              '\nNum cells presubset = ', ncol(tmp),
+                              '\nNum cells remaining = ', length(tmp$percent.mito[tmp@meta.data$percent.mito < mitohi]), '\n'))+
+        xlab('Cells')
+
+
+
+      #save to log and print
+      tmp@commands$tamlabscpipeline[['baseline_mito_filter']] <- gm
+      print(gm)
 
       filteredcells <- names(x[!names(x) %in% names(bad)] )
 
 
-      message('Mito max MAD = ', round(madmax.dist.percentmito.baseline, 3) ,
+      message('\nMito max MAD = ', round(madmax.dist.percentmito.baseline, 3) ,
               '\npercent.mito cutoff = ', round(mitohi, digits = 3),
               '\nNum cells presubset = ', ncol(tmp),
               '\nNum cells remaining = ', length(filteredcells), '\n')
 
 
-
-      #save cutoff params...
-      tmp@commands$baselinemitofilter <- list('MadThresh' = madmax.dist.percentmito.baseline,
-                                              'PercMitoCutoff' = mitohi,
-                                              'CellsPreSub' = ncol(tmp),
-                                              'CellsPostSub' = length(filteredcells)
-      )
-
       tmp <- subset(x = tmp,
                     cells = filteredcells)
 
       rm(abs.dev, bad, right.mad, m, x, x.mad, mad.distance,filteredcells,
-         percent.mito, madmax.dist.percentmito.baseline, mitohi, mito.features)
+         madmax.dist.percentmito.baseline, mitohi)
 
 
     } #end mito baseline block
@@ -360,46 +395,48 @@ seuratpipeline <- function(data,
       )
 
       #plot cutoffs for library size / UMIs
-      print(
-        ggplot(tmp@meta.data) +
-          geom_histogram(aes(nCount_RNA),
-                         color="black", fill = "steelblue",
-                         binwidth = 0.05)+
-          #geom_vline(xintercept = ncountshi, linetype = "dashed", colour = "red")+
-          geom_vline(xintercept = ncountslo, linetype = "dashed", colour = "red")+
-          geom_vline(xintercept = median(tmp@meta.data$nCount_RNA),
-                     linetype = "dotted", colour = "red", size = 1.2)+
-          scale_x_log10()+
-          labs(title = paste0("Library Size per Cell"),
-               x = "Library size (UMI, aka 'nCount'), log10 scale",
-               y = "Number of cells" ,
-               subtitle = paste0(length(rownames(tmp@meta.data)), " cells; median lib size = ",
-                                 median(tmp@meta.data$nCount_RNA)),
-               caption = paste0("cells remaining = ",
-                                length(x) - length(bad)
-               )
-          )+
-          theme_linedraw()
-      )
+      g_lib_hist <- ggplot(tmp@meta.data) +
+        geom_histogram(aes(nCount_RNA),
+                       color="black", fill = "steelblue",
+                       binwidth = 0.05)+
+        #geom_vline(xintercept = ncountshi, linetype = "dashed", colour = "red")+
+        geom_vline(xintercept = ncountslo, linetype = "dashed", colour = "red")+
+        geom_vline(xintercept = median(tmp@meta.data$nCount_RNA),
+                   linetype = "dotted", colour = "red", size = 1.2)+
+        scale_x_log10()+
+        labs(title = paste0("Library Size per Cell"),
+             x = "Library size (UMI, aka 'nCount'), log10 scale",
+             y = "Number of cells" ,
+             subtitle = paste0(length(rownames(tmp@meta.data)), " cells; median lib size = ",
+                               median(tmp@meta.data$nCount_RNA)),
+             caption = paste0("cells remaining = ",
+                              length(x) - length(bad)
+             )
+        )+
+        theme_linedraw()
 
-      print(
-        ggplot(tmp@meta.data, aes(x = 0, y = nCount_RNA))+
-          geom_violin(fill='steelblue')+
-          geom_jitter(height = 0, width = 0.25, size = 0.1)+
-          geom_hline(yintercept = ncountslo, col = 'red', linetype = 'dashed')+
-          theme_linedraw()+
-          scale_y_log10()+
-          theme(axis.text.x=element_blank(),
-                axis.ticks.x=element_blank())+
-          labs(title = paste0("LibSize Cutoff"),
-               subtitle = paste0(length(rownames(tmp@meta.data)), " cells total",
-                                 "; cutoff for libsize low is ", as.character(round(ncountslo, digits = 3))),
-               caption = paste0('Mito max MAD = ', round(madmax.dist.nCount_RNA.baseline, 3) ,
-                                '\npercent.mito cutoff = ', round(ncountslo, digits = 3),
-                                '\nNum cells presubset = ', ncol(tmp),
-                                '\nNum cells remaining = ', length(tmp$percent.mito[tmp@meta.data$nCount_RNA > ncountslo]), '\n'))+
-          xlab('Cells')
-      )
+      g_lib_vln <- ggplot(tmp@meta.data, aes(x = 0, y = nCount_RNA))+
+        geom_violin(fill='steelblue')+
+        geom_jitter(height = 0, width = 0.25, size = 0.1)+
+        geom_hline(yintercept = ncountslo, col = 'red', linetype = 'dashed')+
+        theme_linedraw()+
+        scale_y_log10()+
+        theme(axis.text.x=element_blank(),
+              axis.ticks.x=element_blank())+
+        labs(title = paste0("LibSize Cutoff"),
+             subtitle = paste0(length(rownames(tmp@meta.data)), " cells total",
+                               "; cutoff for libsize low is ", as.character(round(ncountslo, digits = 3))),
+             caption = paste0('Mito max MAD = ', round(madmax.dist.nCount_RNA.baseline, 3) ,
+                              '\npercent.mito cutoff = ', round(ncountslo, digits = 3),
+                              '\nNum cells presubset = ', ncol(tmp),
+                              '\nNum cells remaining = ', length(tmp$percent.mito[tmp@meta.data$nCount_RNA > ncountslo]), '\n'))+
+        xlab('Cells')
+
+      print(g_lib_hist)
+      print(g_lib_vln)
+
+      tmp@commands$tamlabscpipeline[['baseline_libsize_filer_hist']] <- g_lib_hist
+      tmp@commands$tamlabscpipeline[['baseline_libsize_filer_vln']] <- g_lib_vln
 
 
 
@@ -412,21 +449,25 @@ seuratpipeline <- function(data,
               '\nNum cells remaining = ', length(filteredcells), '\n')
 
       #save cutoff params...
-      tmp@commands$baselinelibsizefilter <- list('MadThresh' = madmax.dist.nCount_RNA.baseline,
-                                                 'PercMitoCutoff' = ncountslo,
-                                                 'CellsPreSub' = ncol(tmp),
-                                                 'CellsPostSub' = length(filteredcells)
-      )
+
 
       tmp <- subset(x = tmp,
                     cells = filteredcells)
 
-      rm(abs.dev, bad, left.mad, m, x, x.mad, mad.distance, y, ncountslo, madmax.dist.nCount_RNA.baseline, filteredcells)
+      rm(abs.dev, bad, left.mad, m, x, x.mad, mad.distance, ncountslo, madmax.dist.nCount_RNA.baseline, filteredcells)
 
 
     }
 
   }
+
+
+
+
+
+
+
+
 
 
 
@@ -442,16 +483,22 @@ seuratpipeline <- function(data,
   tmp <- FindNeighbors(object = tmp, dims = 1:30, verbose = F)
   tmp <- FindClusters(object = tmp, resolution = 1.0, verbose = T)
 
+
   #record params for all clusters...
   md <- tmp@meta.data
   avgs <- aggregate(data = md, cbind(nCount_RNA , nFeature_RNA , percent.mito) ~ seurat_clusters, FUN=mean)
   rm(md)
 
-  print(VlnPlot(tmp, c('percent.mito', 'nCount_RNA', 'nFeature_RNA'), ncol=1, pt.size = 0.1))
+  tmp@commands$tamlabscpipeline[['pre_iterative-filter_vln']] <- VlnPlot(tmp, c('percent.mito', 'nCount_RNA', 'nFeature_RNA'), ncol=1, pt.size = 0.1)
+
+
+  #checkpoint_postbaseline <- tmp
+
+
 
   ### remove the mito cluster and recluster ###
   if(removemitomaxclust == T){
-    message('\nRemoving mito cluster(s)')
+    message('\nSearching for Mito High clusters')
 
     avgstmp <- avgs
     gt <- grubbs(avgstmp$percent.mito)
@@ -473,28 +520,30 @@ seuratpipeline <- function(data,
 
     mitohiclusts <- as.vector(avgs$seurat_clusters[!(avgs$seurat_clusters %in% avgstmp$seurat_clusters)])
 
-    mitoclustcells <- WhichCells(tmp, idents = mitohiclusts)
-    tmp <- tmp[,!(colnames(tmp) %in% mitoclustcells)]
+    #sometimes no mito clusts are detected, so this if-esle avoids crashes in that case
+    if( length(mitohiclusts) != 0 ) {
+      mitoclustcells <- WhichCells(tmp, idents = mitohiclusts)
 
-    message('Reclustering without mito clusters\n')
-    suppressWarnings(tmp <- SCTransform(tmp, verbose = T))
+      tmp <- tmp[,!(colnames(tmp) %in% mitoclustcells)]
 
-    tmp <- RunPCA(object = tmp, verbose = F)
+      message('Reclustering without mito clusters\n')
+      suppressWarnings(tmp <- SCTransform(tmp, verbose = T))
 
-    tmp <- FindNeighbors(object = tmp, dims = 1:30, verbose = F)
-    tmp <- FindClusters(object = tmp, resolution = 1.0, verbose = T)
+      tmp <- RunPCA(object = tmp, verbose = F)
+
+      tmp <- FindNeighbors(object = tmp, dims = 1:30, verbose = F)
+      tmp <- FindClusters(object = tmp, resolution = 1.0, verbose = T)
+
+      tmp@commands$tamlabscpipeline[['mitohiclust-result']] <- VlnPlot(tmp, c('percent.mito', 'nCount_RNA', 'nFeature_RNA'), ncol=1, pt.size = 0.1)
+
+
+    } else{
+      message('\nNo Mito High clusters identified by Grubbs test\n')
+
+      tmp@commands$tamlabscpipeline[['mitohiclust-result']] <- paste0("No Mito High clusters identified by Grubbs test")
+
+    }
   }
-
-  #record params for all clusters...
-  #md <- tmp@meta.data
-  #avgs <- aggregate(data = md, cbind(nCount_RNA , nFeature_RNA , percent.mito) ~ seurat_clusters, FUN=mean)
-  #rm(md)
-
-  print(VlnPlot(tmp, c('percent.mito', 'nCount_RNA', 'nFeature_RNA'), ncol=1, pt.size = 0.1))
-
-
-
-
 
 
 
@@ -508,21 +557,30 @@ seuratpipeline <- function(data,
   ########################### filtration loop ####################################
 
 
+
   if(iterativefilter == T) {
+
+
+
+
+
+    #start recording
+    params <- list()
+
 
 
 
     #loop through clusters and get cells with proper library size, based on MAD
     filteredcells <- c()
-    params <- list()
-    for(clust in levels(tmp$seurat_clusters)){        #print(clust) }
+
+    for(clust in levels(tmp$seurat_clusters) ) {        #print(clust) }
 
       message('Filtering cluster ', clust)
       tmpclust <- subset(tmp, idents = clust)
 
 
       if(ncol(tmpclust) < 100) {
-        message('  -Under 100 cells; calculating params, but will not subset')
+        message('  -Under 100 cells; will not subset')
       }
 
 
@@ -710,7 +768,13 @@ seuratpipeline <- function(data,
            ncountshi, ncountslo,
            madmax.dist.nCount_RNA)
 
+
+        cells_after_libsizefilt <- length(filteredclust)
+
       } #end two sided iterative lib size filt
+
+
+
 
 
       if(iterativefilter.libsize == 'lefttail'){
@@ -830,8 +894,7 @@ seuratpipeline <- function(data,
           theme(axis.text.x=element_blank(),
                 axis.ticks.x=element_blank())+
           labs(title = paste0("Library Size per Cell for Cluster", clust),
-               subtitle = paste0(length(rownames(tmpclust@meta.data)), " cells total",
-                                 "; cutoff for percent mito is ", as.character(round(ncountslo, digits = 3))),
+               subtitle = paste0(length(rownames(tmpclust@meta.data)), " cells total"),
                caption = paste0('libsize max MAD = ', round(madmax.dist.nCount_RNA, 3) ,
                                 '\nNum cells presubset = ', ncol(tmpclust),
                                 '\nNum cells remaining = ',
@@ -869,6 +932,8 @@ seuratpipeline <- function(data,
         #add good cells to iterator list
         filteredclust <- names(x[!names(x) %in% names(bad)] )
 
+        cells_after_libsizefilt <- length(filteredclust)
+
         #save params
         # params[[clust]] <- data.frame(libsizemad = madmax.dist.nCount_RNA,
         #                                libsizelo = ncountslo)
@@ -878,11 +943,11 @@ seuratpipeline <- function(data,
            mad.distance,  ncountslo,
            madmax.dist.nCount_RNA)
 
-      } #end left iterative lib size filt
+      } #end left iterative lib size LEFT ONLY filt
 
       if(iterativefilter.libsize ==  F){
         filteredclust <- colnames(tmp)
-        }
+      }
 
       #end iterative lib size filt
 
@@ -1022,11 +1087,12 @@ seuratpipeline <- function(data,
         #save mito filtered cells
         mitofilteredcells <- names(x[!names(x) %in% names(bad)] )
 
-        params[[clust]]$mitomad <- madmax.dist.percentmito
-        params[[clust]]$mitohi  <- mitohi
 
         #remove objects
         rm(abs.dev, bad, right.mad, m, x, x.mad, mad.distance,mitohi, madmax.dist.percentmito)
+
+
+        cells_after_mitofilt <- length(mitofilteredcells)
 
       } else{mitofilteredcells <- colnames(tmp)} #end iterative mito filt
 
@@ -1035,9 +1101,25 @@ seuratpipeline <- function(data,
       #get the good cell barcodes for this cluster
       filteredclust <- intersect(filteredclust, mitofilteredcells)
 
+      cells_after_bothfilt <- length(filteredclust)
+
+      paramdf <- data.frame(Cluster = clust,
+                            Cells_prefilt = ncol(tmpclust)
+      )
+
       #save cell numbers pre and post
-      params[[clust]]$prefilt <- ncol(tmpclust)
-      params[[clust]]$postfilt <- length(filteredclust)
+      if(iterativefilter.libsize != F){
+        paramdf$Cells_after_libsizefilt <- cells_after_libsizefilt
+      }
+      if(iterativefilter.mito != F) {
+        paramdf$Cells_after_mitofilt <- cells_after_mitofilt
+      }
+
+      paramdf$Cells_after_bothfilt_theoretical <- cells_after_bothfilt
+
+
+
+
 
       #if under 100, do not actually subset.
       if(ncol(tmpclust) > 100) {
@@ -1045,51 +1127,53 @@ seuratpipeline <- function(data,
         #barcodes of this cluster to global good barcode list
         filteredcells <- c(filteredcells, filteredclust)
 
+        paramdf$Cells_after_bothfilt_true <- length(filteredclust)
+
       } else{
 
         filteredcells <- c(filteredcells, colnames(tmpclust))
+
+        paramdf$Cells_after_bothfilt_true <- ncol(tmpclust)
       }
 
       rm(filteredclust, mitofilteredcells, tmpclust)
 
 
+      params[[as.character(clust)]] <- paramdf
+
     } #close for clust loop
+
+
+
+
+
+
+    finalparamdf <- bind_rows(params)
+
+    reportingdf <- data.frame(Cells_prefilt = sum(finalparamdf$Cells_prefilt),
+                              cells_postfilt = sum(finalparamdf$Cells_after_bothfilt_true))
+
+    tmp@commands$tamlabscpipeline[['iterativefilter_results']] <- reportingdf
+
+    tmp@commands$tamlabscpipeline[['iterativefilter_details']] <- finalparamdf
+
+    tmp <- tmp[,filteredcells]
+
+    tmp@commands$tamlabscpipeline[['iterativefilter_post-vln']] <- VlnPlot(tmp, c('percent.mito', 'nCount_RNA', 'nFeature_RNA'), ncol=1, pt.size = 0.1)
+
+
+
+
 
   } #close iterative filter conditional loop
 
 
+  #checkpoint_postiter <- tmp
+
+
+  cells_pre_df <- ncol(tmp)
+
   #avgs <- cbind(avgs, rbindlist(params))
-
-  ### second pass normalization and clustering, after removing bad cells ###
-  #read in
-  if(format == 'dir'){
-    tmp <- CreateSeuratObject(Read10X(data),
-                              project = project,
-                              min.features = 200, min.cells = 3)
-  }
-
-  if(format == 'h5'){
-    tmp <- CreateSeuratObject(Read10X_h5(data),
-                              project = project,
-                              min.features = 200, min.cells = 3)
-  }
-
-  if(format == 'kallisto'){
-    tmp <- CreateSeuratObject(res_mat, project = project,
-                              min.cells = 3, min.features = 200)
-  }
-
-  #subset
-  tmp <- tmp[,filteredcells]
-
-  #mito content, add to metadata
-  mito.features <- grep(pattern = "^mt-", x = rownames(x = tmp), value = TRUE)
-  percent.mito <- Matrix::colSums(
-    x = GetAssayData(object = tmp, slot = 'counts')[mito.features, ]) / Matrix::colSums(x = GetAssayData(object = tmp, slot = 'counts')
-    )
-  tmp[['percent.mito']] <- percent.mito
-
-  rm(percent.mito, mito.features)
 
   #cluster
   message('\nInitiating second-pass clustering:\n')
@@ -1109,7 +1193,10 @@ seuratpipeline <- function(data,
   message('DF Parameter Sweep Completed')
 
   sweepstats <- summarizeSweep(sweepres)
+
+  pdf(NULL) #prevent plotted output
   bcmvn <- find.pK(sweepstats)
+  dev.off()
 
   maxscorepk <- bcmvn[bcmvn$BCmetric == max(bcmvn$BCmetric),2]
   maxscorepk <- as.numeric( levels(maxscorepk)[maxscorepk] )
@@ -1121,7 +1208,7 @@ seuratpipeline <- function(data,
   #homotypic doublet modelling
 
   ### using 10x table, use linear regression --> important for predicting homotypic / total doublet number
-  tamlabscpipeline::dratedf
+  #tamlabscpipeline::dratedf
   #dratedf <- read.delim('/Users/ferrenaa/Documents/tam/scripts/doublets/doubletrate.txt', header = T)
   dratedf[,1] <- as.numeric(sub("%","",dratedf[,1]))/100
 
@@ -1144,63 +1231,57 @@ seuratpipeline <- function(data,
                     orig.ident = tmp$orig.ident,
                     classification = tmp@meta.data[,ncol(tmp@meta.data)])
 
-  print( table(ddf$classification ))
+  #print( table(ddf$classification ))
 
   ddf <- ddf[ddf$classification == 'Singlet',]
+
+  doublets <- table(ddf$classification )['Doublet']
+  singlets <- table(ddf$classification )['Singlet']
+
+
+  dfoutput <- data.frame(cells_pre_df = cells_pre_df,
+                         doublets = doublets,
+                         singlets = singlets,
+                         row.names = NULL)
+
+
+  tmp@commands$tamlabscpipeline[['DoubletFinder_results']] <- dfoutput
+
+  tmp <- tmp[,ddf$cells]
+
+
+
+
+
+
 
   ### 4th pass clustering ###
 
   message('\nInitiating final clustering:\n')
 
-  #read in
-  if(format == 'dir'){
-    tmp <- CreateSeuratObject(Read10X(data),
-                              project = project,
-                              min.features = 200, min.cells = 3)
-  }
-
-  if(format == 'h5'){
-    tmp <- CreateSeuratObject(Read10X_h5(data),
-                              project = project,
-                              min.features = 200, min.cells = 3)
-  }
-
-  if(format == 'kallisto'){
-    tmp <- CreateSeuratObject(res_mat, project = project,
-                              min.cells = 3, min.features = 200)
-  }
-
-  tmp <- tmp[,ddf$cells]
-
-  #mito content, add to metadata
-  mito.features <- grep(pattern = "^mt-", x = rownames(x = tmp), value = TRUE)
-  percent.mito <- Matrix::colSums(
-    x = GetAssayData(object = tmp, slot = 'counts')[mito.features, ]) / Matrix::colSums(x = GetAssayData(object = tmp, slot = 'counts')
-    )
-  tmp[['percent.mito']] <- percent.mito
-  rm(mito.features, percent.mito)
 
   #cell cycle scoring
+  vars.to.reg <- c('percent.mito', 'percent.ribo')
 
   if(cellcycleregression == 'difference' | cellcycleregression == 'total'){
     message('Initating cell cycle regression procedure\n')
 
     #get mouse homologs
     #mart <- useMart(biomart = 'ENSEMBL_MART_ENSEMBL',
-      #              dataset ='hsapiens_gene_ensembl',
-       #             host = 'www.ensembl.org')
+    #              dataset ='hsapiens_gene_ensembl',
+    #             host = 'www.ensembl.org')
 
     #s.genes <- getBM(attributes = c("mmusculus_homolog_associated_gene_name"),
-     #                filters = 'hgnc_symbol',
-      #               #values = genes$ensemble.genes,
-       #              value = cc.genes[[1]],
-        #             mart = mart)[,1]
+    #                filters = 'hgnc_symbol',
+    #               #values = genes$ensemble.genes,
+    #              value = cc.genes[[1]],
+    #             mart = mart)[,1]
 
     #g2m.genes <- getBM(attributes = c("mmusculus_homolog_associated_gene_name"),
-     #                  filters = 'hgnc_symbol',
-      #                 #values = genes$ensemble.genes,
-       #                value = cc.genes[[2]],
-        #               mart = mart)[,1]
+    #                  filters = 'hgnc_symbol',
+    #                 #values = genes$ensemble.genes,
+    #                value = cc.genes[[2]],
+    #               mart = mart)[,1]
 
     s.genes <- tamlabscpipeline::s.genes
     g2m.genes <- tamlabscpipeline::g2m.genes
@@ -1216,7 +1297,7 @@ seuratpipeline <- function(data,
 
     tmp$CC.Difference <- tmp$S.Score - tmp$G2M.Score
     suppressWarnings(tmp <- SCTransform(tmp, verbose = T, return.only.var.genes = F,
-                                        vars.to.regress = c('percent.mito', 'CC.Difference') ) )
+                                        vars.to.regress = c(vars.to.reg, 'CC.Difference') ) )
   }
 
 
@@ -1224,7 +1305,7 @@ seuratpipeline <- function(data,
     message('Regressing out total cell cycle score and normalizing\n')
 
     suppressWarnings(tmp <- SCTransform(tmp, verbose = T, return.only.var.genes = F,
-                                        vars.to.regress = c('percent.mito', "S.Score", "G2M.Score") ) )
+                                        vars.to.regress = c(vars.to.reg, "S.Score", "G2M.Score") ) )
   }
 
 
@@ -1242,7 +1323,7 @@ seuratpipeline <- function(data,
 
 
     suppressWarnings(tmp <- SCTransform(tmp, verbose = T, return.only.var.genes = F,
-                                        vars.to.regress = 'percent.mito') )
+                                        vars.to.regress = vars.to.reg) )
   }
 
 
