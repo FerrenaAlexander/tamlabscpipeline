@@ -168,11 +168,11 @@ seuratpipeline <- function(data,
 
   tmp[["percent.mito"]] <- PercentageFeatureSet(tmp, features = mito.features)
 
-  #ribo
-  ribogenes <- readxl::read_excel('~/Documents/tam/scripts/ribogenes.xlsx')
-  goodribo <- ribogenes$genesymbol[ribogenes$genesymbol %in% rownames(tmp)]
-
-  tmp[["percent.ribo"]] <- PercentageFeatureSet(tmp, features = goodribo)
+  #ribo --> remove sincethese are ribo protein genes...
+  # ribogenes <- readxl::read_excel('~/Documents/tam/scripts/ribogenes.xlsx')
+  # goodribo <- ribogenes$genesymbol[ribogenes$genesymbol %in% rownames(tmp)]
+  #
+  # tmp[["percent.ribo"]] <- PercentageFeatureSet(tmp, features = goodribo)
 
 
   #checkpoint_prebaseline <- tmp
@@ -1261,7 +1261,7 @@ seuratpipeline <- function(data,
 
 
   #cell cycle scoring
-  vars.to.reg <- c('percent.mito', 'percent.ribo')
+  vars.to.reg <- c('percent.mito')
 
   if(cellcycleregression == 'difference' | cellcycleregression == 'total'){
     message('Initating cell cycle regression procedure\n')
