@@ -77,16 +77,18 @@ seuratpipeline <- function(data,
   if(is.null( dims )) {dims <- 1:30}
   if(is.null( res )) {res <- c(0.5, 1.5, 1)}
 
-  message('Reading in ', project, ' from file: ', data)
+
 
   #read in
   if(format == 'dir'){
+    message('Reading in ', project, ' from file: ', data)
     tmp <- CreateSeuratObject(Read10X(data),
                               project = project,
                               min.features = 200, min.cells = 3)
   }
 
   if(format == 'h5'){
+    message('Reading in ', project, ' from file: ', data)
     tmp <- CreateSeuratObject(Read10X_h5(data),
                               project = project,
                               min.features = 200, min.cells = 3)
@@ -95,6 +97,7 @@ seuratpipeline <- function(data,
 
 
   if(format == 'kallisto'){
+    message('Reading in ', project, ' from file: ', data)
     #read in data from kallisto | bustools
     res_mat <- BUSpaRse::read_count_output(dir = data, name = 'gene', tcc = F)
 
@@ -129,6 +132,7 @@ seuratpipeline <- function(data,
   }
 
   if(format == 'mat'){
+    message('Reading in ', project)
     tmp <- CreateSeuratObject(data,
                               project = project,
                               min.features = 200, min.cells = 3)
