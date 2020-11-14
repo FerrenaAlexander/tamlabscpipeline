@@ -4,8 +4,8 @@
 #' Basic SC pipeline for a single input dataset.
 #' Perform QC and clustering of an input dataset.
 #'
-#' @param data a string containing a filepath with format connoted by the format parameter.
-#' @param format a string, either 'dir' for cellranger dir output; 'h5' for cellranger h5 output, 'kallisto' for the kallisto|bustools pipeline output, or 'mat' for gene expression matrix (genes X cells) format
+#' @param data a string containing a filepath with format connoted by the format parameter, or a gene expression matrix (genes x cells) matrix, if format is 'mat'.
+#' @param format a string, either 'dir' for cellranger dir output; 'h5' for cellranger h5 output, 'kallisto' for the kallisto|bustools pipeline output, or 'mat' for gene expression matrix (genes x cells) format
 #' @param transcript_gene_file a string containing a filepath for the "transcript_gene" conversion file. Only used for Kallisto|bustools workflow.
 #' @param baselinefilter.mad T/F; whether to perform "global" QC, ie without pre-clustering. Default = False.
 #' @param baseline.mito.filter T/F; whether to perform global maximum mitochondrial content filtration using median absolute deviation threshold; will only work if baselinefilter.mad is set to True. Default is True.
