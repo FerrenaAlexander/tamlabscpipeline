@@ -28,9 +28,9 @@ seuratpipeline(
 )
 }
 \arguments{
-\item{data}{a string containing a filepath with format connoted by the format parameter.}
+\item{data}{a string containing a filepath with format connoted by the format parameter, or a gene expression matrix (genes x cells) matrix, if format is 'mat'.}
 
-\item{format}{a string, either 'dir' for cellranger dir output; 'h5' for cellranger h5 output, or 'kallisto' for the kallisto|bustools pipeline output}
+\item{format}{a string, either 'dir' for cellranger dir output; 'h5' for cellranger h5 output, 'kallisto' for the kallisto|bustools pipeline output, or 'mat' for gene expression matrix (genes x cells) format}
 
 \item{transcript_gene_file}{a string containing a filepath for the "transcript_gene" conversion file. Only used for Kallisto|bustools workflow.}
 
