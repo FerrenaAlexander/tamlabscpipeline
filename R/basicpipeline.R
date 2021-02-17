@@ -177,7 +177,7 @@ seuratpipeline <- function(data,
 
   #mito and ribo content, add to metadata
   #mito
-  mito.features <- grep(pattern = "^mt-", x = rownames(x = tmp), value = TRUE)
+  mito.features <- grep(pattern = "^mt-", x = rownames(x = tmp), value = TRUE, ignore.case = T)
 
   tmp[["percent.mito"]] <- PercentageFeatureSet(tmp, features = mito.features)
 
