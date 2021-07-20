@@ -1,7 +1,9 @@
 # tamlabscpipeline
 A basic package for scRNAseq data analysis.
 
-Update (September 2 2020) - this package will soon be updated to support new versions of R and dependency packages. This is in the works and will hopefully be done in the coming weeks.
+# this package is no longer being supported
+For ongoing support for automated qc, please see:
+https://github.com/FerrenaAlexander/FerrenaSCRNAseq
 
 
 This pipeline was designed to automatically perform various QC steps such as mitochondrial content cutoffs and doublet detection.
